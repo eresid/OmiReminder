@@ -23,6 +23,7 @@ See [REQUIREMENTS.md](REQUIREMENTS.md) for the full requirements.
 | Backend API | Express.js, TypeScript, Mongoose, MongoDB |
 
 Shared tooling: pnpm, Prettier, ESLint, Vitest, Supertest, GitHub Actions. The desktop app is packaged with electron-builder.
+The backend is hosted on DigitalOcean and remains independent of provider-specific services.
 
 ## Project structure
 

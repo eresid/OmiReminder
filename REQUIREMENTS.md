@@ -6,7 +6,7 @@ Status: draft, initial planning stage.
 
 ## 1. Overview
 
-OmiReminder is a cross-platform reminder app. It has three clients of one remote backend:
+OmiReminder is a cross-platform reminder app. It has two clients and one remote backend:
 
 | Component | Directory | Description |
 |---|---|---|
@@ -45,6 +45,7 @@ The first version has no email sending. The user model should still include an `
 | `priority` | yes | `low`, `normal`, or `high`. Default: `normal`. |
 | `tags` | no | List of strings. |
 | `recurrence` | no | See 3.2. Empty means a one-time reminder. |
+| `advanceNoticeMinutes` | no | Minutes before each occurrence for an additional notification. Empty means no advance notification. |
 | `status` | yes | `active`, `completed`, or `archived`. |
 | `snoozedUntil` | no | UTC date and time, set when the user snoozes a notification. |
 | `createdAt`, `updatedAt` | yes | UTC timestamps. |
@@ -59,6 +60,7 @@ The first version has no email sending. The user model should still include an `
 - **FR-REC-4.** Yearly recurrence repeats on the same date. A reminder set for 29 February fires on 28 February in non-leap years.
 - **FR-REC-5.** Occurrences are calculated in the reminder's `timeZone`, so a daily 09:00 reminder stays at 09:00 local time across daylight saving changes.
 - **FR-REC-6.** Completing an occurrence of a recurring reminder moves it to the next occurrence. The user can also stop the recurrence.
+- **FR-REC-7.** If a recurrence falls at a local time skipped by a daylight saving transition, move that occurrence to the nearest valid local time after the gap.
 
 ### 3.3 Operations
 
@@ -70,6 +72,7 @@ The first version has no email sending. The user model should still include an `
 ## 4. Notifications
 
 - **FR-NOT-1.** When a reminder is due, the client notifies the user through the enabled channels.
+- **FR-NOT-1a.** By default, notifications fire at the exact due date and time. For each reminder, the user may enable an additional advance notification with a checkbox and choose how many minutes before the occurrence it fires. The notification at the due time still fires.
 - **FR-NOT-2.** Channels in the desktop app:
 
   | Channel | Default |
@@ -81,7 +84,7 @@ The first version has no email sending. The user model should still include an `
   Each channel can be turned on or off in settings.
 - **FR-NOT-3.** The extension shows notifications through `chrome.notifications` and schedules them with `chrome.alarms`.
 - **FR-NOT-4.** From a notification the user can open the reminder, mark it as completed, or snooze it (for example 5, 15, or 60 minutes, or 1 day).
-- **FR-NOT-5.** Reminders that became due while the client was not running are shown as missed when the client starts.
+- **FR-NOT-5.** Reminders that became due while the client was not running are shown as missed when the client starts. If several occurrences of the same recurring reminder were missed, show only the latest missed notification for that reminder.
 - **FR-NOT-5a.** Every running client of the account shows its own notification for a due reminder, even if another client already did. This ensures no reminder is missed. Deduplication between clients may be added later.
 - **FR-NOT-6 (future).** Email notifications.
 - **FR-NOT-7 (future).** Telegram notifications.
@@ -90,7 +93,7 @@ Future channels are sent by the backend, so the notification model must allow se
 
 ## 5. Offline mode and sync
 
-- **FR-SYNC-1.** Each client keeps a local cache of the user's reminders and works fully offline: view, create, edit, delete, complete, snooze.
+- **FR-SYNC-1.** Registration and the first sign-in require an internet connection. After a successful sign-in, each client keeps a local cache of the user's reminders and works fully offline: view, create, edit, delete, complete, snooze.
 - **FR-SYNC-2.** Local changes that are not yet on the server are marked as **unsynced**, and the UI shows this status.
 - **FR-SYNC-3.** When the connection returns, the client sends its unsynced changes and fetches changes from the server.
 - **FR-SYNC-4.** The client also syncs on start, after sign-in, and periodically while online, so it does not request the server on every screen.
@@ -160,7 +163,7 @@ Local storage:
 
 ### 10.3 Hosting
 
-- The backend is planned to be hosted on DigitalOcean first. The final choice is not fixed.
+- The backend is hosted on DigitalOcean.
 - MongoDB runs in the cloud (for example MongoDB Atlas or DigitalOcean Managed MongoDB) or on the same server.
 - The backend must not depend on provider-specific services, so it can move to another host. Configuration comes only from environment variables.
 
@@ -202,4 +205,4 @@ Local storage:
 
 ## 12. Open questions
 
-- Final hosting provider for the backend and MongoDB (DigitalOcean is the first candidate).
+- MongoDB deployment option: DigitalOcean Managed MongoDB, MongoDB Atlas, or self-hosted on DigitalOcean.
