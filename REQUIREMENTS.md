@@ -151,7 +151,7 @@ Local storage:
 - Package manager: pnpm.
 - Runtime: current Node.js LTS.
 - Formatting: Prettier in all projects. Linting: ESLint with TypeScript support.
-- The API contract is described in an OpenAPI document in `backend/`. Clients keep their own types that match it.
+- The API contract is described in an OpenAPI document in `backend/`, available through Swagger UI in non-production environments (see 10.8). Clients keep their own types that match it.
 
 ### 10.2 Stack
 
@@ -194,6 +194,32 @@ Local storage:
 - CORS allows only the extension origin and the desktop app.
 - All API input is validated.
 
+### 10.8 Environments
+
+| Environment | Purpose | Swagger UI | Sentry | Google Analytics |
+|---|---|---|---|---|
+| `local` | Development | on | off by default | off |
+| `stage` | Testing before release | on | on | on, separate property |
+| `production` | Real users | off | on | on |
+
+- The environment is set by the `APP_ENV` variable (`local`, `stage`, `production`). It is separate from `NODE_ENV`, because stage runs a production build.
+- Swagger UI serves the OpenAPI document at `/api/docs`. In production the route is not registered at all.
+- Each environment has its own database, secrets, Sentry environment, and Google Analytics property.
+- Desktop and extension builds for stage and production use the matching API URL, set at build time.
+
+### 10.9 Error monitoring
+
+- Sentry is used in all three projects: backend, desktop app (main and renderer processes), and extension (popup and service worker).
+- Events are tagged with the environment and the release version. Source maps for release builds are uploaded to Sentry in CI.
+- Events must not contain reminder content (title, description, tags), email addresses, passwords, or tokens. Sensitive data is removed before sending. Users are identified only by their internal user ID.
+
+### 10.10 Analytics
+
+- Google Analytics 4 collects anonymous usage events in the desktop app and the extension, for example app start, sign-in, reminder created, notification action, and settings change.
+- Events are sent through the GA4 Measurement Protocol. Manifest V3 does not allow remote scripts, and `gtag.js` does not work reliably in Electron.
+- Events must not contain reminder content or personal data. The analytics client ID is a random value, not the email or user ID.
+- A privacy policy that describes Sentry and Google Analytics data collection is required before publishing the extension to the Chrome Web Store and releasing the desktop app.
+
 ## 11. Out of scope for now
 
 - Multiple accounts in one client.
@@ -206,3 +232,8 @@ Local storage:
 ## 12. Open questions
 
 - MongoDB deployment option: DigitalOcean Managed MongoDB, MongoDB Atlas, or self-hosted on DigitalOcean.
+- Should users be able to turn off analytics and crash reports in settings, and should analytics require consent on first start?
+- Should users be able to delete their account and all data?
+- How should a recurrence at a local time that occurs twice (when clocks go back) be handled?
+- Can a reminder have only one advance notification, or several?
+- How long are completed, archived, and soft-deleted reminders kept?

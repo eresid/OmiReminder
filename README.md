@@ -20,9 +20,10 @@ See [REQUIREMENTS.md](REQUIREMENTS.md) for the full requirements.
 |---|---|
 | Desktop app | Electron, React, TypeScript, Vite, Zustand, SQLite |
 | Chrome extension | React, TypeScript, Vite, Zustand, IndexedDB (Manifest V3) |
-| Backend API | Express.js, TypeScript, Mongoose, MongoDB |
+| Backend API | Express.js, TypeScript, Mongoose, MongoDB, Swagger (OpenAPI) |
 
 Shared tooling: pnpm, Prettier, ESLint, Vitest, Supertest, GitHub Actions. The desktop app is packaged with electron-builder.
+Error monitoring uses Sentry, and usage analytics uses Google Analytics 4.
 The backend is hosted on DigitalOcean and remains independent of provider-specific services.
 
 ## Project structure

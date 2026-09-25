@@ -22,6 +22,8 @@ This file is the single source of truth for project instructions for all agents 
 - All user-facing strings go through localization and must have English and Ukrainian translations.
 - Store dates in UTC and keep the reminder's IANA time zone separately.
 - Never commit secrets. Add new environment variables to the project's `.env.example`.
+- Use `APP_ENV` (`local`, `stage`, `production`) for environment-specific behavior, not `NODE_ENV`. Swagger UI must stay disabled in production.
+- Never send reminder content, email addresses, passwords, or tokens to Sentry or Google Analytics.
 
 ## Checks
 
