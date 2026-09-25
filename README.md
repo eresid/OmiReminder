@@ -1,23 +1,40 @@
 # OmiReminder
 
-OmiReminder is a simple reminder app designed to run locally and stay in the system tray. It will notify users about upcoming events and tasks that need attention soon. A Chrome extension will provide browser access to the same reminders through the shared backend.
+OmiReminder is a cross-platform reminder app. The desktop app lives in the system tray and notifies you about upcoming events and tasks. A Chrome extension gives access to the same reminders in the browser. Both clients work offline and sync through a shared remote backend.
 
-## Planned technology stack
+See [REQUIREMENTS.md](REQUIREMENTS.md) for the full requirements.
 
-- Electron, React.js, and TypeScript for the desktop frontend
-- A Chrome browser extension
-- Express.js for the backend API
-- MongoDB for data storage
+## Features
 
-The desktop app and Chrome extension will use the same backend API.
+- Reminders with title, description, date and time, priority, tags, and recurrence (daily, weekly, monthly, yearly)
+- Notifications through OS notifications, sound, and a pop-up window, each configurable
+- Snooze and missed reminder handling
+- Offline mode with a local cache and automatic sync
+- Email and password sign-in
+- English and Ukrainian UI
+- Windows, macOS, and Linux desktop app, plus a Chrome extension
+
+## Technology stack
+
+| Project | Stack |
+|---|---|
+| Desktop app | Electron, React, TypeScript, Vite, Zustand, SQLite |
+| Chrome extension | React, TypeScript, Vite, Zustand, IndexedDB (Manifest V3) |
+| Backend API | Express.js, TypeScript, Mongoose, MongoDB |
+
+Shared tooling: pnpm, Prettier, ESLint, Vitest, Supertest, GitHub Actions. The desktop app is packaged with electron-builder.
 
 ## Project structure
 
-- `frontend/` — desktop interface and Electron app
-- `extension/` — Chrome browser extension
-- `backend/` — API and data access
+- `frontend/` — Electron desktop app
+- `extension/` — Chrome extension
+- `backend/` — REST API and data access
 
-The application is in its initial planning stage.
+Each directory is an independent project with its own `package.json`.
+
+## Status
+
+The project is in its initial planning stage.
 
 ## License
 
