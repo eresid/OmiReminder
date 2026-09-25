@@ -31,6 +31,28 @@ Both clients work offline with a local cache and sync with the backend when a co
 
 The first version has no email sending. The user model should still include an `emailVerified` field so version 2 does not need a data migration.
 
+### 2.1 Consent
+
+The registration form has two separate checkboxes. Both are unchecked by default:
+
+| Checkbox | Required | Effect |
+|---|---|---|
+| "I agree to the Privacy Policy" (with a link to the policy) | yes | Registration is not possible without it. |
+| "Allow usage statistics to help improve the app" | no | Enables Google Analytics (see 10.10). Registration does not depend on it. |
+
+- **FR-CONS-1.** Accepting the Privacy Policy is required for registration. It covers the processing needed for the service, crash reports (see 10.9), and server-side metrics (see 10.10). These do not need separate consent.
+- **FR-CONS-2.** Consent to usage statistics is optional and separate. Without it, Google Analytics is not used for this account.
+- **FR-CONS-3.** Both records are stored on the server with the account: the date and time, the Privacy Policy version, and for usage statistics whether it was given or withdrawn.
+- **FR-CONS-4.** The user can give or withdraw consent to usage statistics at any time in settings. The change syncs to all clients of the account.
+- **FR-CONS-5.** When a new Privacy Policy version is published, the user must accept it on the next sign-in or app start to continue using the app. Consent to usage statistics is kept.
+
+### 2.2 Account deletion
+
+- **FR-DEL-1.** The user can delete their account from settings in the desktop app and in the extension. Deletion requires an internet connection and confirmation with the account password.
+- **FR-DEL-2.** Deleting the account permanently removes the user and all their reminders, settings, and consent records from the server, and revokes all tokens.
+- **FR-DEL-3.** The client that deleted the account clears its local cache. Other clients clear their local cache on the next sync, when the server reports that the account no longer exists.
+- **FR-DEL-4.** The Privacy Policy contains step-by-step instructions for deleting the account.
+
 ## 3. Reminders
 
 ### 3.1 Fields
@@ -45,7 +67,7 @@ The first version has no email sending. The user model should still include an `
 | `priority` | yes | `low`, `normal`, or `high`. Default: `normal`. |
 | `tags` | no | List of strings. |
 | `recurrence` | no | See 3.2. Empty means a one-time reminder. |
-| `advanceNoticeMinutes` | no | Minutes before each occurrence for an additional notification. Empty means no advance notification. |
+| `advanceNoticeMinutes` | no | Minutes before each occurrence for one additional notification. Empty means no advance notification. |
 | `status` | yes | `active`, `completed`, or `archived`. |
 | `snoozedUntil` | no | UTC date and time, set when the user snoozes a notification. |
 | `createdAt`, `updatedAt` | yes | UTC timestamps. |
@@ -61,6 +83,7 @@ The first version has no email sending. The user model should still include an `
 - **FR-REC-5.** Occurrences are calculated in the reminder's `timeZone`, so a daily 09:00 reminder stays at 09:00 local time across daylight saving changes.
 - **FR-REC-6.** Completing an occurrence of a recurring reminder moves it to the next occurrence. The user can also stop the recurrence.
 - **FR-REC-7.** If a recurrence falls at a local time skipped by a daylight saving transition, move that occurrence to the nearest valid local time after the gap.
+- **FR-REC-8.** If a recurrence falls at a local time that occurs twice because clocks go back, the reminder fires only at the first of the two moments.
 
 ### 3.3 Operations
 
@@ -72,7 +95,7 @@ The first version has no email sending. The user model should still include an `
 ## 4. Notifications
 
 - **FR-NOT-1.** When a reminder is due, the client notifies the user through the enabled channels.
-- **FR-NOT-1a.** By default, notifications fire at the exact due date and time. For each reminder, the user may enable an additional advance notification with a checkbox and choose how many minutes before the occurrence it fires. The notification at the due time still fires.
+- **FR-NOT-1a.** By default, notifications fire at the exact due date and time. For each reminder, the user may enable one additional advance notification with a checkbox and choose how many minutes before the occurrence it fires. The notification at the due time still fires.
 - **FR-NOT-2.** Channels in the desktop app:
 
   | Channel | Default |
@@ -99,6 +122,7 @@ Future channels are sent by the backend, so the notification model must allow se
 - **FR-SYNC-4.** The client also syncs on start, after sign-in, and periodically while online, so it does not request the server on every screen.
 - **FR-SYNC-5.** Deletions are soft deletes (`deletedAt`) so they can be synced to other devices.
 - **FR-SYNC-6.** Conflicts are resolved with last write wins by server-accepted `updatedAt`. This can be refined later.
+- **FR-SYNC-7.** Completed, archived, and soft-deleted reminders are kept permanently as history. They are removed only when the account is deleted (see 2.2).
 
 Local storage:
 
@@ -116,6 +140,7 @@ Local storage:
 | First day of the week | from OS locale | desktop, extension | account |
 | Time format (12 or 24 hours) | from OS locale | desktop, extension | account |
 | Default snooze duration | 15 minutes | desktop, extension | account |
+| Usage statistics | as chosen at registration | desktop, extension | account |
 
 - **FR-SET-1.** Device settings (language, notifications, app behavior) are stored only on the device.
 - **FR-SET-2.** Account settings (date and time preferences) are stored on the server and synced to all clients of the account, like reminders.
@@ -172,7 +197,8 @@ Local storage:
 - Test runner: **Vitest** in all three projects. It works with Vite and TypeScript without extra configuration and has a Jest-compatible API. It also runs backend tests.
 - Backend integration tests use Supertest against the Express app and an in-memory MongoDB (`mongodb-memory-server`).
 - Integration tests are written together with the features, starting from the first endpoint.
-- Recurrence, time zone, and sync logic must have unit tests, including the edge cases in 3.2.
+- Recurrence, time zone, and sync logic must have unit tests, including the edge cases in 3.2. Daylight saving transitions (FR-REC-7 and FR-REC-8) must be tested for both a skipped hour and a repeated hour, in time zones of both hemispheres.
+- Account deletion must have integration tests that check no user data remains on the server.
 
 ### 10.5 Build, packaging, and updates
 
@@ -199,8 +225,8 @@ Local storage:
 | Environment | Purpose | Swagger UI | Sentry | Google Analytics |
 |---|---|---|---|---|
 | `local` | Development | on | off by default | off |
-| `stage` | Testing before release | on | on | on, separate property |
-| `production` | Real users | off | on | on |
+| `stage` | Testing before release | on | on | with consent, separate property |
+| `production` | Real users | off | on | with consent |
 
 - The environment is set by the `APP_ENV` variable (`local`, `stage`, `production`). It is separate from `NODE_ENV`, because stage runs a production build.
 - Swagger UI serves the OpenAPI document at `/api/docs`. In production the route is not registered at all.
@@ -212,13 +238,30 @@ Local storage:
 - Sentry is used in all three projects: backend, desktop app (main and renderer processes), and extension (popup and service worker).
 - Events are tagged with the environment and the release version. Source maps for release builds are uploaded to Sentry in CI.
 - Events must not contain reminder content (title, description, tags), email addresses, passwords, or tokens. Sensitive data is removed before sending. Users are identified only by their internal user ID.
+- Crash reports are collected on the basis of legitimate interest, are described in the Privacy Policy, and do not need separate consent.
 
 ### 10.10 Analytics
 
-- Google Analytics 4 collects anonymous usage events in the desktop app and the extension, for example app start, sign-in, reminder created, notification action, and settings change.
+Analytics has two levels.
+
+**Server-side metrics (all users).**
+
+- The backend calculates aggregate metrics from its own data, for example registrations, active accounts, and created reminders.
+- No data is sent to third parties for these metrics. They are described in the Privacy Policy and do not need separate consent.
+
+**Google Analytics 4 (only with consent).**
+
+- GA4 collects usage events in the desktop app and the extension, for example app start, sign-in, reminder created, notification action, and settings change.
+- GA4 is used only while the account has consent to usage statistics (see 2.1). Before sign-in, and while consent is not given, no events are sent and no analytics client ID is stored on the device.
+- When consent is withdrawn, the client stops sending events and deletes the stored analytics client ID.
 - Events are sent through the GA4 Measurement Protocol. Manifest V3 does not allow remote scripts, and `gtag.js` does not work reliably in Electron.
 - Events must not contain reminder content or personal data. The analytics client ID is a random value, not the email or user ID.
-- A privacy policy that describes Sentry and Google Analytics data collection is required before publishing the extension to the Chrome Web Store and releasing the desktop app.
+
+### 10.11 Privacy Policy
+
+- A Privacy Policy is required before publishing the extension to the Chrome Web Store and releasing the desktop app.
+- It describes what data is stored, crash reports (Sentry), server-side metrics, optional Google Analytics usage statistics, how consent is recorded and withdrawn, and how to delete the account (FR-DEL-4).
+- It is available from the registration screen and from settings in both clients, and it has a version number.
 
 ## 11. Out of scope for now
 
@@ -227,13 +270,9 @@ Local storage:
 - Email and Telegram notifications (planned, see 4).
 - Email verification and password reset (planned for version 2, see 2).
 - Deduplication of notifications between clients (see FR-NOT-5a).
+- Multiple advance notifications for one reminder.
 - Sharing reminders between users.
 
 ## 12. Open questions
 
 - MongoDB deployment option: DigitalOcean Managed MongoDB, MongoDB Atlas, or self-hosted on DigitalOcean.
-- Should users be able to turn off analytics and crash reports in settings, and should analytics require consent on first start?
-- Should users be able to delete their account and all data?
-- How should a recurrence at a local time that occurs twice (when clocks go back) be handled?
-- Can a reminder have only one advance notification, or several?
-- How long are completed, archived, and soft-deleted reminders kept?

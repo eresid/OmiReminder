@@ -10,7 +10,7 @@ See [REQUIREMENTS.md](REQUIREMENTS.md) for the full requirements.
 - Notifications through OS notifications, sound, and a pop-up window, each configurable
 - Snooze and missed reminder handling
 - Offline mode with a local cache and automatic sync
-- Email and password sign-in
+- Email and password sign-in, with account deletion from settings
 - English and Ukrainian UI
 - Windows, macOS, and Linux desktop app, plus a Chrome extension
 
@@ -23,7 +23,7 @@ See [REQUIREMENTS.md](REQUIREMENTS.md) for the full requirements.
 | Backend API | Express.js, TypeScript, Mongoose, MongoDB, Swagger (OpenAPI) |
 
 Shared tooling: pnpm, Prettier, ESLint, Vitest, Supertest, GitHub Actions. The desktop app is packaged with electron-builder.
-Error monitoring uses Sentry, and usage analytics uses Google Analytics 4.
+Error monitoring uses Sentry. Optional usage analytics uses Google Analytics 4 and is enabled only with the user's consent.
 The backend is hosted on DigitalOcean and remains independent of provider-specific services.
 
 ## Project structure

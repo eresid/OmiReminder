@@ -18,12 +18,13 @@ This file is the single source of truth for project instructions for all agents 
 - Use pnpm. Do not use npm or yarn, and do not commit other lockfiles.
 - Use TypeScript with `strict` mode in all projects.
 - Use Vitest for tests. Backend integration tests use Supertest and `mongodb-memory-server`.
-- Add or update tests together with the code they cover. Recurrence, time zone, and sync logic must have unit tests for edge cases.
+- Add or update tests together with the code they cover. Recurrence, time zone, and sync logic must have unit tests for edge cases, including daylight saving transitions (skipped and repeated hours).
 - All user-facing strings go through localization and must have English and Ukrainian translations.
 - Store dates in UTC and keep the reminder's IANA time zone separately.
 - Never commit secrets. Add new environment variables to the project's `.env.example`.
 - Use `APP_ENV` (`local`, `stage`, `production`) for environment-specific behavior, not `NODE_ENV`. Swagger UI must stay disabled in production.
 - Never send reminder content, email addresses, passwords, or tokens to Sentry or Google Analytics.
+- Send Google Analytics events only when the account has consent to usage statistics. Without consent, do not store an analytics client ID on the device.
 
 ## Checks
 
