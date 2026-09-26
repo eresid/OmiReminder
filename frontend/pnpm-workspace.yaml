@@ -1,0 +1,3 @@
+# Project-local pnpm settings. This file does not define a workspace.
+allowBuilds:
+  esbuild: true

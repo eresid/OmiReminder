@@ -157,7 +157,7 @@ Future channels are sent by the backend. Their scheduling policy needs a time zo
 
 Local storage:
 
-- Desktop app: SQLite in the Electron main process.
+- Desktop app: SQLite in the Electron main process, through the built-in `node:sqlite` module. It needs no native module, so there is no rebuild for each Electron version and platform, and unit tests run in plain Node.js.
 - Extension: IndexedDB.
 
 ## 6. Settings
@@ -220,7 +220,7 @@ Local storage:
 
 | Project | Stack |
 |---|---|
-| `frontend/` | Electron, React, TypeScript, Vite, Zustand, SQLite |
+| `frontend/` | Electron, electron-vite, React, TypeScript, Vite, Zustand, i18next, SQLite (`node:sqlite`) |
 | `extension/` | React, TypeScript, Vite, Zustand, IndexedDB |
 | `backend/` | Express.js, TypeScript, Mongoose, MongoDB, dotenv, cross-env |
 

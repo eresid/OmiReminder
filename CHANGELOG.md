@@ -75,7 +75,7 @@ A local Windows desktop app: one-time date-based reminders, a main screen with o
 
 ### Desktop app (Windows)
 
-- [ ] Project setup: Electron, React, TypeScript (`strict`), Vite, Zustand, ESLint, Prettier, Vitest.
+- [x] Project setup: Electron, electron-vite, React, TypeScript (`strict`), Vite, Zustand, i18next, ESLint, Prettier, Vitest.
 - [ ] Localization with English and Ukrainian. Language from the OS, English as fallback, changeable in settings (section 7).
 - [ ] Local SQLite database in the Electron main process, with schema migrations (section 5).
 - [ ] Reminder storage with the fields from section 3.1 that do not depend on the server: client-generated UUID `id`, title, description, date-only `dueDate`, priority, tags, status, UTC `createdAt` and `updatedAt`.
