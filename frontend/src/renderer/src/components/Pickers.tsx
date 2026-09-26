@@ -9,12 +9,15 @@ import { Icon } from "./Icon";
 import { Popover, usePopover } from "./Popover";
 
 interface DateMenuProps {
-  value: string;
+  /** `null` for a reminder without a date. */
+  value: string | null;
   onSelect: (date: string) => void;
+  /** Shows a "No date" option (FR-NODATE-2). */
+  onClear?: () => void;
 }
 
 /** Quick options and a calendar. Past dates cannot be chosen (FR-REM-6). */
-export function DateMenu({ value, onSelect }: DateMenuProps) {
+export function DateMenu({ value, onSelect, onClear }: DateMenuProps) {
   const { t } = useTranslation();
   const format = useDateFormatter();
   const today = useAppStore((state) => state.today);
@@ -42,13 +45,26 @@ export function DateMenu({ value, onSelect }: DateMenuProps) {
             <span className="menu-item-hint">{format.weekday(option.date)}</span>
           </button>
         ))}
+        {onClear ? (
+          <button
+            type="button"
+            className={["menu-item", value === null ? "is-selected" : ""].join(" ")}
+            onClick={onClear}
+          >
+            <Icon name="noDate" size={16} />
+            <span className="menu-item-label">{t("dates.noDate")}</span>
+          </button>
+        ) : null}
       </div>
       <Calendar value={value} minDate={today} onSelect={onSelect} />
     </div>
   );
 }
 
-function dateTone(date: string, today: string): string {
+function dateTone(date: string | null, today: string): string {
+  if (date === null) {
+    return "";
+  }
   if (date < today) {
     return "tone-danger";
   }
@@ -56,16 +72,18 @@ function dateTone(date: string, today: string): string {
 }
 
 interface DateButtonProps {
-  value: string;
-  onChange: (date: string) => void;
+  value: string | null;
+  onChange: (date: string | null) => void;
 }
 
+/** The date of a new or edited reminder. It can also be "No date" (FR-NODATE-2). */
 export function DateButton({ value, onChange }: DateButtonProps) {
   const { t } = useTranslation();
   const format = useDateFormatter();
   const today = useAppStore((state) => state.today);
   const anchorRef = useRef<HTMLButtonElement>(null);
   const popover = usePopover();
+  const label = value === null ? t("dates.noDate") : format.dayLabel(value);
 
   return (
     <>
@@ -75,17 +93,21 @@ export function DateButton({ value, onChange }: DateButtonProps) {
         className={["chip-button", dateTone(value, today)].join(" ")}
         aria-haspopup="dialog"
         aria-expanded={popover.open}
-        aria-label={`${t("reminder.date")}: ${format.dayLabel(value)}`}
+        aria-label={`${t("reminder.date")}: ${label}`}
         onClick={popover.toggle}
       >
-        <Icon name="calendar" size={16} />
-        {format.dayLabel(value)}
+        <Icon name={value === null ? "noDate" : "calendar"} size={16} />
+        {label}
       </button>
       <Popover anchorRef={anchorRef} open={popover.open} onClose={popover.close} label={t("reminder.date")}>
         <DateMenu
           value={value}
           onSelect={(date) => {
             onChange(date);
+            popover.close();
+          }}
+          onClear={() => {
+            onChange(null);
             popover.close();
           }}
         />

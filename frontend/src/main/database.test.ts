@@ -10,7 +10,7 @@ describe("database", () => {
       .prepare("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name")
       .all()
       .map((row) => row.name);
-    expect(tables).toEqual(["reminders", "settings"]);
+    expect(tables).toEqual(["reminder_tags", "reminders", "settings", "tags"]);
     db.close();
   });
 
@@ -37,6 +37,17 @@ describe("database", () => {
         `INSERT INTO reminders (id, title, due_date, priority, created_at, updated_at)
          VALUES ('a', 'Title', '2026-09-26', 'urgent', 'now', 'now')`
       );
+    }).toThrow();
+    db.close();
+  });
+
+  it("allows a reminder without a date and links reminders only to existing tags", () => {
+    const db = openDatabase(":memory:");
+    db.exec(
+      `INSERT INTO reminders (id, title, priority, created_at, updated_at) VALUES ('a', 'Title', 'normal', 'now', 'now')`
+    );
+    expect(() => {
+      db.exec(`INSERT INTO reminder_tags (reminder_id, tag_id, position) VALUES ('a', 'missing', 0)`);
     }).toThrow();
     db.close();
   });

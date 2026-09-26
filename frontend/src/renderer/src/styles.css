@@ -30,6 +30,17 @@
   --toast-bg: #262626;
   --toast-text: #f5f5f5;
 
+  /* Tag colors are only dots next to the tag name, so one set works in both themes. */
+  --tag-neutral: #a3a3a0;
+  --tag-red: #e03e3e;
+  --tag-orange: #e8772e;
+  --tag-yellow: #d9ad0f;
+  --tag-green: #2f9e5b;
+  --tag-teal: #1c9c9c;
+  --tag-blue: #3b6fd8;
+  --tag-purple: #8b54d6;
+  --tag-pink: #d6509b;
+
   --radius: 8px;
   --radius-small: 6px;
 
@@ -214,6 +225,8 @@ p {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-height: 0;
+  overflow: hidden;
   padding: 16px 12px;
   background: var(--bg-sidebar);
   border-right: 1px solid var(--border);
@@ -251,6 +264,53 @@ p {
 
 .nav-bottom {
   margin-top: auto;
+  padding-top: 8px;
+}
+
+.nav-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  margin-top: 16px;
+}
+
+.nav-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px 4px 10px;
+}
+
+.nav-section-title {
+  color: var(--text-faint);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.nav-section-action {
+  width: 24px;
+  height: 24px;
+}
+
+.nav-scroll {
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.nav-item-muted {
+  color: var(--text-muted);
+}
+
+.nav-archived .nav-item {
+  padding-left: 22px;
+  color: var(--text-muted);
+}
+
+.nav-item .tag-dot {
+  width: 10px;
+  height: 10px;
+  margin: 0 4px;
 }
 
 .nav-item {
@@ -451,6 +511,108 @@ p {
 
 .tag {
   color: var(--text-muted);
+}
+
+.tag-dot {
+  display: inline-block;
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tag-neutral);
+}
+
+.tag-color-red {
+  background: var(--tag-red);
+}
+
+.tag-color-orange {
+  background: var(--tag-orange);
+}
+
+.tag-color-yellow {
+  background: var(--tag-yellow);
+}
+
+.tag-color-green {
+  background: var(--tag-green);
+}
+
+.tag-color-teal {
+  background: var(--tag-teal);
+}
+
+.tag-color-blue {
+  background: var(--tag-blue);
+}
+
+.tag-color-purple {
+  background: var(--tag-purple);
+}
+
+.tag-color-pink {
+  background: var(--tag-pink);
+}
+
+.tag-heading h1 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow-wrap: anywhere;
+}
+
+.tag-heading h1 .tag-dot {
+  width: 12px;
+  height: 12px;
+}
+
+.group-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: inherit;
+}
+
+.group-toggle svg {
+  color: var(--text-muted);
+}
+
+.group-footer + .group {
+  margin-top: 28px;
+}
+
+/* Tag filter */
+
+.filter-button.is-active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.filter-button-label {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.filter-menu {
+  max-height: min(360px, 60vh);
+  overflow-y: auto;
+}
+
+.filter-notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  margin: -12px 0 20px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.filter-notice.has-overdue span {
+  color: var(--danger);
 }
 
 .row-actions {
@@ -752,6 +914,47 @@ p {
   background: var(--border-strong);
 }
 
+.tag-chip .tag-dot {
+  margin-right: 4px;
+}
+
+.tag-chip-large {
+  min-height: 30px;
+  font-size: 13px;
+}
+
+/* The suggestions take a full row below the chips, so the dialog does not need to scroll. */
+.tag-suggestions {
+  flex-basis: 100%;
+  margin: 0;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  list-style: none;
+}
+
+.tag-suggestions .menu-item {
+  cursor: default;
+}
+
+.text-input {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-small);
+  background: transparent;
+}
+
+.text-input:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.field-error {
+  color: var(--danger);
+  font-size: 13px;
+}
+
 .confirm {
   display: flex;
   flex-direction: column;
@@ -820,6 +1023,60 @@ p {
 
 .menu-check {
   color: var(--accent);
+}
+
+.menu-item.is-highlighted {
+  background: var(--bg-hover);
+}
+
+.menu-item-separated {
+  margin-top: 4px;
+  border-top: 1px solid var(--border);
+  border-radius: 0 0 var(--radius-small) var(--radius-small);
+}
+
+.menu-item-danger {
+  color: var(--danger);
+}
+
+.menu-section {
+  padding: 6px 8px;
+}
+
+.menu-section-title {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.color-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  max-width: 200px;
+}
+
+.color-swatch {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+.color-swatch:hover {
+  background: var(--bg-hover);
+}
+
+.color-swatch .tag-dot {
+  width: 14px;
+  height: 14px;
+}
+
+/* The selected color is marked by a ring, not only by its color. */
+.color-swatch[aria-pressed="true"] {
+  box-shadow: inset 0 0 0 2px var(--text);
 }
 
 .date-menu {
@@ -1052,8 +1309,15 @@ p {
 
   .brand,
   .nav-label,
-  .nav-count {
+  .nav-count,
+  .nav-chevron,
+  .nav-section-title {
     display: none;
+  }
+
+  .nav-section-header {
+    justify-content: center;
+    padding: 0 0 4px;
   }
 
   .view {

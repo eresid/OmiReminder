@@ -3,46 +3,85 @@ import { useTranslation } from "react-i18next";
 import type { Reminder, ReminderPatch } from "../../../shared/types";
 import {
   DESCRIPTION_MAX_LENGTH,
-  normalizeTags,
   TAG_MAX_LENGTH,
   TAGS_MAX_COUNT,
+  tagNameKey,
   TITLE_MAX_LENGTH,
 } from "../../../shared/validation";
-import { useAppStore } from "../store";
+import { findTagByName, useAppStore } from "../store";
 import { Dialog } from "./Dialog";
 import { Icon } from "./Icon";
 import { DateButton, PriorityButton } from "./Pickers";
+import { TagDot } from "./TagDot";
 
-function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[]) => void }) {
+/** A tag chosen in the editor. A new name has no ID until the reminder is saved. */
+interface TagDraft {
+  id: string | null;
+  name: string;
+}
+
+const SUGGESTION_LIMIT = 6;
+
+type Suggestion = { kind: "tag"; id: string; name: string } | { kind: "create"; name: string };
+
+/** Tags with suggestions from existing tags; any other name becomes a new tag (FR-TAG-9). */
+function TagInput({ selected, onChange }: { selected: TagDraft[]; onChange: (tags: TagDraft[]) => void }) {
   const { t } = useTranslation();
+  const tags = useAppStore((state) => state.tags);
   const [draft, setDraft] = useState("");
+  const [highlighted, setHighlighted] = useState(0);
   const inputId = useId();
+  const listId = useId();
 
-  function commit(): void {
-    if (draft.trim()) {
-      onChange(normalizeTags([...tags, draft]));
-      setDraft("");
+  const query = draft.trim();
+  const selectedKeys = new Set(selected.map((tag) => tagNameKey(tag.name)));
+  const suggestions: Suggestion[] = [];
+  if (query) {
+    const key = tagNameKey(query);
+    for (const tag of [...tags].sort((a, b) => a.name.localeCompare(b.name))) {
+      const tagKey = tagNameKey(tag.name);
+      if (tag.archivedAt === null && !selectedKeys.has(tagKey) && tagKey.includes(key)) {
+        suggestions.push({ kind: "tag", id: tag.id, name: tag.name });
+      }
     }
+    suggestions.splice(SUGGESTION_LIMIT);
+    if (!findTagByName(tags, query) && !selectedKeys.has(key)) {
+      suggestions.push({ kind: "create", name: query });
+    }
+  }
+  const activeIndex = Math.min(highlighted, suggestions.length - 1);
+  const active = suggestions[activeIndex];
+
+  function add(name: string): void {
+    const trimmed = name.trim();
+    setDraft("");
+    setHighlighted(0);
+    if (!trimmed || selectedKeys.has(tagNameKey(trimmed)) || selected.length >= TAGS_MAX_COUNT) {
+      return;
+    }
+    const existing = findTagByName(tags, trimmed);
+    onChange([...selected, existing ? { id: existing.id, name: existing.name } : { id: null, name: trimmed }]);
   }
 
   return (
     <div className="tag-input">
       <Icon name="tag" size={16} className="tag-input-icon" />
-      {tags.map((tag) => (
-        <span key={tag} className="tag-chip">
-          {tag}
+      {selected.map((tag) => (
+        <span key={tagNameKey(tag.name)} className="tag-chip">
+          <TagDot color={tags.find((item) => item.id === tag.id)?.color ?? null} />
+          {tag.name}
           <button
             type="button"
-            aria-label={t("reminder.removeTag", { tag })}
+            aria-label={t("reminder.removeTag", { tag: tag.name })}
             onClick={() => {
-              onChange(tags.filter((item) => item !== tag));
+              onChange(selected.filter((item) => item !== tag));
             }}
           >
             <Icon name="close" size={12} />
           </button>
         </span>
       ))}
-      {tags.length < TAGS_MAX_COUNT ? (
+      {selected.length < TAGS_MAX_COUNT ? (
         <>
           <label htmlFor={inputId} className="visually-hidden">
             {t("reminder.tagsPlaceholder")}
@@ -51,20 +90,70 @@ function TagInput({ tags, onChange }: { tags: string[]; onChange: (tags: string[
             id={inputId}
             value={draft}
             maxLength={TAG_MAX_LENGTH}
-            placeholder={tags.length === 0 ? t("reminder.tagsPlaceholder") : ""}
+            autoComplete="off"
+            role="combobox"
+            aria-expanded={suggestions.length > 0}
+            aria-controls={listId}
+            aria-autocomplete="list"
+            aria-activedescendant={active ? `${listId}-${String(activeIndex)}` : undefined}
+            placeholder={selected.length === 0 ? t("reminder.tagsPlaceholder") : ""}
             onChange={(event) => {
               setDraft(event.target.value);
+              setHighlighted(0);
             }}
-            onBlur={commit}
+            onBlur={() => {
+              add(draft);
+            }}
             onKeyDown={(event) => {
               if (event.key === "Enter" || event.key === ",") {
                 event.preventDefault();
-                commit();
-              } else if (event.key === "Backspace" && draft === "" && tags.length > 0) {
-                onChange(tags.slice(0, -1));
+                add(event.key === "Enter" && active ? active.name : draft);
+              } else if ((event.key === "ArrowDown" || event.key === "ArrowUp") && suggestions.length > 0) {
+                event.preventDefault();
+                const step = event.key === "ArrowDown" ? 1 : -1;
+                setHighlighted((activeIndex + step + suggestions.length) % suggestions.length);
+              } else if (event.key === "Escape" && draft) {
+                // Clear the draft instead of closing the dialog.
+                event.preventDefault();
+                setDraft("");
+              } else if (event.key === "Backspace" && draft === "" && selected.length > 0) {
+                onChange(selected.slice(0, -1));
               }
             }}
           />
+          {suggestions.length > 0 ? (
+            <ul id={listId} className="tag-suggestions" role="listbox" aria-label={t("tags.suggestions")}>
+              {suggestions.map((suggestion, index) => (
+                <li
+                  key={`${suggestion.kind}-${suggestion.name}`}
+                  id={`${listId}-${String(index)}`}
+                  role="option"
+                  aria-selected={index === activeIndex}
+                  className={["menu-item", index === activeIndex ? "is-highlighted" : ""].join(" ")}
+                  onMouseDown={(event) => {
+                    // Keep focus in the input, so blur does not add the typed text instead.
+                    event.preventDefault();
+                    add(suggestion.name);
+                  }}
+                  onMouseEnter={() => {
+                    setHighlighted(index);
+                  }}
+                >
+                  {suggestion.kind === "tag" ? (
+                    <>
+                      <TagDot color={tags.find((tag) => tag.id === suggestion.id)?.color ?? null} />
+                      <span className="menu-item-label">{suggestion.name}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Icon name="plus" size={14} />
+                      <span className="menu-item-label">{t("tags.createNamed", { name: suggestion.name })}</span>
+                    </>
+                  )}
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </>
       ) : null}
     </div>
@@ -110,7 +199,13 @@ function EditForm({ reminder }: { reminder: Reminder }) {
   const [description, setDescription] = useState(reminder.description);
   const [dueDate, setDueDate] = useState(reminder.dueDate);
   const [priority, setPriority] = useState(reminder.priority);
-  const [tags, setTags] = useState(reminder.tags);
+  const allTags = useAppStore((state) => state.tags);
+  const [tags, setTags] = useState<TagDraft[]>(() =>
+    reminder.tagIds.flatMap((id) => {
+      const tag = allTags.find((item) => item.id === id);
+      return tag ? [{ id: tag.id, name: tag.name }] : [];
+    })
+  );
   const [confirming, setConfirming] = useState(false);
   const titleId = useId();
   const descriptionId = useId();
@@ -121,7 +216,9 @@ function EditForm({ reminder }: { reminder: Reminder }) {
   if (description !== reminder.description) patch.description = description;
   if (dueDate !== reminder.dueDate) patch.dueDate = dueDate;
   if (priority !== reminder.priority) patch.priority = priority;
-  if (tags.join("\n") !== reminder.tags.join("\n")) patch.tags = tags;
+  const tagIds = tags.flatMap((tag) => (tag.id === null ? [] : [tag.id]));
+  const newTagNames = tags.flatMap((tag) => (tag.id === null ? [tag.name] : []));
+  if (newTagNames.length > 0 || tagIds.join("\n") !== reminder.tagIds.join("\n")) patch.tagIds = tagIds;
   const canSave = title.trim().length > 0 && Object.keys(patch).length > 0;
 
   return (
@@ -130,7 +227,7 @@ function EditForm({ reminder }: { reminder: Reminder }) {
       onSubmit={(event) => {
         event.preventDefault();
         if (canSave) {
-          void updateReminder(reminder.id, patch).then(close);
+          void updateReminder(reminder.id, patch, newTagNames).then(close);
         }
       }}
     >
@@ -162,7 +259,7 @@ function EditForm({ reminder }: { reminder: Reminder }) {
           setDescription(event.target.value);
         }}
       />
-      <TagInput tags={tags} onChange={setTags} />
+      <TagInput selected={tags} onChange={setTags} />
       <div className="form-toolbar">
         {isCompleted ? null : <DateButton value={dueDate} onChange={setDueDate} />}
         <PriorityButton value={priority} onChange={setPriority} />

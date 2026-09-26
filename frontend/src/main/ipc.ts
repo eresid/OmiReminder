@@ -8,12 +8,16 @@ import {
   validateNewReminder,
   validateReminderPatch,
   validateSettingsPatch,
+  validateNewTag,
+  validateTagPatch,
 } from "../shared/validation";
 import type { ReminderRepository } from "./reminderRepository";
+import type { TagRepository } from "./tagRepository";
 import type { SettingsRepository } from "./settingsRepository";
 
 export interface IpcDependencies {
   reminders: ReminderRepository;
+  tags: TagRepository;
   settings: SettingsRepository;
   getEnvironment: () => Environment;
   onRemindersChanged: () => void;
@@ -22,7 +26,7 @@ export interface IpcDependencies {
 
 /** Registers the handlers behind `window.api`. All input from the renderer is validated. */
 export function registerIpcHandlers(deps: IpcDependencies): void {
-  const { reminders, settings } = deps;
+  const { reminders, tags, settings } = deps;
 
   function mutation<T>(work: () => T): T {
     const result = work();
@@ -56,6 +60,16 @@ export function registerIpcHandlers(deps: IpcDependencies): void {
   ipcMain.handle(IpcChannel.setDueDates, (_event, changes: unknown) => {
     mutation(() => {
       reminders.setDueDates(validateDueDateChanges(changes));
+    });
+  });
+  ipcMain.handle(IpcChannel.listTags, () => tags.list());
+  ipcMain.handle(IpcChannel.createTag, (_event, input: unknown) => mutation(() => tags.create(validateNewTag(input))));
+  ipcMain.handle(IpcChannel.updateTag, (_event, id: unknown, patch: unknown) =>
+    mutation(() => tags.update(validateId(id), validateTagPatch(patch)))
+  );
+  ipcMain.handle(IpcChannel.deleteTag, (_event, id: unknown) => {
+    mutation(() => {
+      tags.delete(validateId(id));
     });
   });
   ipcMain.handle(IpcChannel.getSettings, () => settings.get());

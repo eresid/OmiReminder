@@ -14,6 +14,7 @@ import { registerIpcHandlers } from "./ipc";
 import { createAppIcon } from "./nativeIcons";
 import { ReminderRepository } from "./reminderRepository";
 import { SettingsRepository } from "./settingsRepository";
+import { TagRepository } from "./tagRepository";
 import { formatDailySummary } from "./summaryText";
 
 /** Matches `--bg` in the renderer, so the window does not flash while it loads. */
@@ -45,6 +46,7 @@ function start(): void {
 
   const db = openDatabase(join(app.getPath("userData"), "omireminder.sqlite"));
   const reminders = new ReminderRepository(db);
+  const tags = new TagRepository(db);
   const settings = new SettingsRepository(db, resolveLanguage(app.getPreferredSystemLanguages()));
   settings.ensureLanguage();
   // The renderer follows this through `prefers-color-scheme`, and so do native controls.
@@ -191,6 +193,7 @@ function start(): void {
 
   registerIpcHandlers({
     reminders,
+    tags,
     settings,
     getEnvironment: () => {
       const systemLocale = app.getSystemLocale();

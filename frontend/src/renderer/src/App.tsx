@@ -5,9 +5,10 @@ import { EditDialog } from "./components/EditDialog";
 import { QuickAddDialog } from "./components/QuickAddDialog";
 import { SettingsView } from "./components/SettingsView";
 import { Sidebar } from "./components/Sidebar";
+import { TagView } from "./components/TagView";
 import { TodayView } from "./components/TodayView";
 import { ToastHost } from "./components/ToastHost";
-import { useAppStore } from "./store";
+import { tagIdOfView, useAppStore } from "./store";
 
 function isTyping(target: EventTarget | null): boolean {
   return (
@@ -18,6 +19,7 @@ function isTyping(target: EventTarget | null): boolean {
 
 export function App() {
   const view = useAppStore((state) => state.view);
+  const tagId = tagIdOfView(view);
 
   useEffect(() => {
     const { reload, setToday, setView, openQuickAdd } = useAppStore.getState();
@@ -28,7 +30,7 @@ export function App() {
       api.onTodayChanged(setToday),
       api.onNavigate((target) => {
         if (target === "quick-add") {
-          openQuickAdd();
+          openQuickAdd({ fromView: false });
         } else {
           setView(target);
         }
@@ -64,6 +66,8 @@ export function App() {
         {view === "today" ? <TodayView /> : null}
         {view === "all" ? <AllRemindersView /> : null}
         {view === "settings" ? <SettingsView /> : null}
+        {view === "inbox" ? <TagView tagId={null} /> : null}
+        {tagId !== null ? <TagView key={tagId} tagId={tagId} /> : null}
       </main>
       <QuickAddDialog />
       <EditDialog />

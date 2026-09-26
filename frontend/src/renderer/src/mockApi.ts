@@ -1,10 +1,13 @@
 import { addDays, toDateOnly } from "../../shared/dates";
-import type { OmiApi, Priority, Reminder, ReminderListKind, Settings } from "../../shared/types";
+import type { OmiApi, Priority, Reminder, ReminderListKind, Settings, Tag } from "../../shared/types";
 import {
+  tagNameKey,
   validateDueDateChanges,
   validateNewReminder,
+  validateNewTag,
   validateReminderPatch,
   validateSettingsPatch,
+  validateTagPatch,
 } from "../../shared/validation";
 
 /** An in-memory API with sample data, used only when the dev server runs in a plain browser. */
@@ -14,16 +17,25 @@ export function createMockApi(): OmiApi {
   let settings: Settings = { language: "en", theme: "system", launchAtStartup: true, notificationTime: "09:00" };
   let sequence = 0;
 
-  function sample(title: string, offset: number, priority: Priority = "normal"): Reminder {
+  function sampleTag(name: string, color: Tag["color"]): Tag {
+    sequence += 1;
+    const timestamp = new Date(Date.now() + sequence).toISOString();
+    return { id: `tag-${String(sequence)}`, name, color, archivedAt: null, createdAt: timestamp, updatedAt: timestamp };
+  }
+
+  const tags: Tag[] = [sampleTag("Work", "blue"), sampleTag("Home", "green"), sampleTag("Shopify course", "purple")];
+  const [work, home, course] = tags.map((tag) => tag.id) as [string, string, string];
+
+  function sample(title: string, offset: number | null, priority: Priority = "normal"): Reminder {
     sequence += 1;
     const timestamp = new Date(Date.now() + sequence).toISOString();
     return {
       id: `sample-${String(sequence)}`,
       title,
       description: "",
-      dueDate: addDays(today, offset),
+      dueDate: offset === null ? null : addDays(today, offset),
       priority,
-      tags: [],
+      tagIds: [],
       status: "active",
       completedAt: null,
       createdAt: timestamp,
@@ -32,14 +44,35 @@ export function createMockApi(): OmiApi {
   }
 
   const reminders: Reminder[] = [
-    sample("Submit the expense report", -2, "high"),
+    { ...sample("Submit the expense report", -2, "high"), tagIds: [work] },
     sample("Renew the domain", -1),
     sample("Pay the electricity bill", 0, "high"),
-    { ...sample("Water the plants", 0), tags: ["home"] },
-    { ...sample("Read the design review", 0, "low"), description: "Notes from the last call." },
+    { ...sample("Water the plants", 0), tagIds: [home] },
+    { ...sample("Read the design review", 0, "low"), description: "Notes from the last call.", tagIds: [work] },
     sample("Call the dentist", 3),
     sample("Buy a birthday gift", 3, "low"),
+    { ...sample("Watch the theme lesson", null), tagIds: [course] },
+    { ...sample("Set up a test store", null, "high"), tagIds: [course] },
+    sample("Ideas for the weekend", null),
   ];
+
+  function findTag(id: string): Tag {
+    const tag = tags.find((item) => item.id === id && !deletedTags.has(item.id));
+    if (!tag) {
+      throw new Error(`Tag ${id} was not found`);
+    }
+    return tag;
+  }
+
+  function assertNameFree(name: string, exceptId: string | null): void {
+    if (
+      tags.some((tag) => tag.id !== exceptId && !deletedTags.has(tag.id) && tagNameKey(tag.name) === tagNameKey(name))
+    ) {
+      throw new Error(`A tag named ${name} already exists`);
+    }
+  }
+
+  const deletedTags = new Set<string>();
 
   function find(id: string): Reminder {
     const reminder = reminders.find((item) => item.id === id);
@@ -61,7 +94,7 @@ export function createMockApi(): OmiApi {
   function list(kind: ReminderListKind): Reminder[] {
     return reminders
       .filter((reminder) => reminder.status === kind)
-      .map((reminder) => ({ ...reminder, tags: [...reminder.tags] }));
+      .map((reminder) => ({ ...reminder, tagIds: [...reminder.tagIds] }));
   }
 
   return {
@@ -69,12 +102,15 @@ export function createMockApi(): OmiApi {
     listReminders: (kind) => Promise.resolve(list(kind)),
     createReminder: (input) => {
       const valid = validateNewReminder(input);
-      const reminder = { ...sample(valid.title, 0, valid.priority), dueDate: valid.dueDate };
+      valid.tagIds.forEach(findTag);
+      const reminder = { ...sample(valid.title, 0, valid.priority), dueDate: valid.dueDate, tagIds: valid.tagIds };
       reminders.push(reminder);
       return changed({ ...reminder });
     },
     updateReminder: (id, patch) => {
-      const reminder = Object.assign(find(id), validateReminderPatch(patch), {
+      const valid = validateReminderPatch(patch);
+      valid.tagIds?.forEach(findTag);
+      const reminder = Object.assign(find(id), valid, {
         updatedAt: new Date().toISOString(),
       });
       return changed({ ...reminder });
@@ -95,6 +131,38 @@ export function createMockApi(): OmiApi {
     setDueDates: (changes) => {
       for (const change of validateDueDateChanges(changes)) {
         find(change.id).dueDate = change.dueDate;
+      }
+      return changed(undefined);
+    },
+    listTags: () => Promise.resolve(tags.filter((tag) => !deletedTags.has(tag.id)).map((tag) => ({ ...tag }))),
+    createTag: (input) => {
+      const valid = validateNewTag(input);
+      assertNameFree(valid.name, null);
+      const tag = { ...sampleTag(valid.name, valid.color) };
+      tags.push(tag);
+      return changed({ ...tag });
+    },
+    updateTag: (id, patch) => {
+      const valid = validateTagPatch(patch);
+      const tag = findTag(id);
+      if (valid.name !== undefined) {
+        assertNameFree(valid.name, id);
+        tag.name = valid.name;
+      }
+      if (valid.color !== undefined) {
+        tag.color = valid.color;
+      }
+      if (valid.archived !== undefined) {
+        tag.archivedAt = valid.archived ? (tag.archivedAt ?? new Date().toISOString()) : null;
+      }
+      tag.updatedAt = new Date().toISOString();
+      return changed({ ...tag });
+    },
+    deleteTag: (id) => {
+      findTag(id);
+      deletedTags.add(id);
+      for (const reminder of reminders) {
+        reminder.tagIds = reminder.tagIds.filter((tagId) => tagId !== id);
       }
       return changed(undefined);
     },

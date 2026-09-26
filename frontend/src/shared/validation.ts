@@ -1,14 +1,18 @@
 import { isValidDateOnly } from "./dates";
 import { isLanguage } from "./locale";
 import { isValidTime } from "./summary";
-import type {
-  DueDateChange,
-  NewReminderInput,
-  Priority,
-  ReminderListKind,
-  ReminderPatch,
-  Settings,
-  Theme,
+import {
+  TAG_COLORS,
+  type DueDateChange,
+  type NewReminderInput,
+  type NewTagInput,
+  type Priority,
+  type ReminderListKind,
+  type ReminderPatch,
+  type Settings,
+  type TagColor,
+  type TagPatch,
+  type Theme,
 } from "./types";
 
 export const TITLE_MAX_LENGTH = 500;
@@ -30,7 +34,7 @@ function isPriority(value: unknown): value is Priority {
 
 export function validateId(value: unknown): string {
   if (typeof value !== "string" || value.length === 0 || value.length > 100) {
-    throw new ValidationError("Invalid reminder id");
+    throw new ValidationError("Invalid id");
   }
   return value;
 }
@@ -53,9 +57,13 @@ function validateTitle(value: unknown): string {
   return title;
 }
 
-function validateDueDate(value: unknown): string {
+/** A `YYYY-MM-DD` date, or `null` for a reminder without a date (FR-NODATE-1). */
+function validateDueDate(value: unknown): string | null {
+  if (value === null) {
+    return null;
+  }
   if (!isValidDateOnly(value)) {
-    throw new ValidationError("Due date must be a YYYY-MM-DD date");
+    throw new ValidationError("Due date must be a YYYY-MM-DD date or null");
   }
   return value;
 }
@@ -67,31 +75,71 @@ function validatePriority(value: unknown): Priority {
   return value;
 }
 
-/** Trims tags, drops empty values and case-insensitive duplicates. */
-export function normalizeTags(value: unknown): string[] {
+/** Drops duplicate IDs and keeps the order (FR-TAG-1). */
+export function validateTagIds(value: unknown): string[] {
   if (!Array.isArray(value)) {
-    throw new ValidationError("Tags must be a list");
+    throw new ValidationError("Tag IDs must be a list");
   }
-  const tags: string[] = [];
-  const seen = new Set<string>();
-  for (const item of value) {
-    if (typeof item !== "string") {
-      throw new ValidationError("Each tag must be a string");
-    }
-    const tag = item.trim();
-    if (tag.length > TAG_MAX_LENGTH) {
-      throw new ValidationError("Tag is too long");
-    }
-    const key = tag.toLocaleLowerCase();
-    if (tag.length > 0 && !seen.has(key)) {
-      seen.add(key);
-      tags.push(tag);
-    }
-  }
-  if (tags.length > TAGS_MAX_COUNT) {
+  const ids = [...new Set(value.map((item: unknown) => validateId(item)))];
+  if (ids.length > TAGS_MAX_COUNT) {
     throw new ValidationError("Too many tags");
   }
-  return tags;
+  return ids;
+}
+
+/** Trims the name. It must have 1 to `TAG_MAX_LENGTH` characters (section 3.6). */
+export function validateTagName(value: unknown): string {
+  if (typeof value !== "string") {
+    throw new ValidationError("Tag name must be a string");
+  }
+  const name = value.trim();
+  if (name.length === 0 || name.length > TAG_MAX_LENGTH) {
+    throw new ValidationError("Tag name must not be empty or too long");
+  }
+  return name;
+}
+
+/** The key that makes tag names unique ignoring case, for any script. */
+export function tagNameKey(name: string): string {
+  return name.trim().toLowerCase();
+}
+
+export function isTagColor(value: unknown): value is TagColor {
+  return typeof value === "string" && (TAG_COLORS as readonly string[]).includes(value);
+}
+
+function validateTagColor(value: unknown): TagColor | null {
+  if (value !== null && !isTagColor(value)) {
+    throw new ValidationError("Invalid tag color");
+  }
+  return value;
+}
+
+export function validateNewTag(value: unknown): NewTagInput {
+  if (!isRecord(value)) {
+    throw new ValidationError("Invalid tag");
+  }
+  return { name: validateTagName(value.name), color: validateTagColor(value.color ?? null) };
+}
+
+export function validateTagPatch(value: unknown): TagPatch {
+  if (!isRecord(value)) {
+    throw new ValidationError("Invalid tag changes");
+  }
+  const patch: TagPatch = {};
+  if (value.name !== undefined) {
+    patch.name = validateTagName(value.name);
+  }
+  if (value.color !== undefined) {
+    patch.color = validateTagColor(value.color);
+  }
+  if (value.archived !== undefined) {
+    if (typeof value.archived !== "boolean") {
+      throw new ValidationError("Invalid archived value");
+    }
+    patch.archived = value.archived;
+  }
+  return patch;
 }
 
 export function validateNewReminder(value: unknown): NewReminderInput {
@@ -102,6 +150,7 @@ export function validateNewReminder(value: unknown): NewReminderInput {
     title: validateTitle(value.title),
     dueDate: validateDueDate(value.dueDate),
     priority: validatePriority(value.priority),
+    tagIds: validateTagIds(value.tagIds ?? []),
   };
 }
 
@@ -125,8 +174,8 @@ export function validateReminderPatch(value: unknown): ReminderPatch {
   if (value.priority !== undefined) {
     patch.priority = validatePriority(value.priority);
   }
-  if (value.tags !== undefined) {
-    patch.tags = normalizeTags(value.tags);
+  if (value.tagIds !== undefined) {
+    patch.tagIds = validateTagIds(value.tagIds);
   }
   return patch;
 }

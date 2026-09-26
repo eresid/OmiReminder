@@ -6,7 +6,8 @@ import { useAppStore } from "../store";
 import { Icon } from "./Icon";
 
 interface CalendarProps {
-  value: string;
+  /** `null` when nothing is selected. */
+  value: string | null;
   /** Dates before this one cannot be selected. */
   minDate: string;
   onSelect: (date: string) => void;
@@ -17,7 +18,7 @@ export function Calendar({ value, minDate, onSelect }: CalendarProps) {
   const format = useDateFormatter();
   const today = useAppStore((state) => state.today);
   const firstDayOfWeek = useAppStore((state) => state.environment.firstDayOfWeek);
-  const [month, setMonth] = useState(() => firstOfMonth(value < minDate ? minDate : value));
+  const [month, setMonth] = useState(() => firstOfMonth(value === null || value < minDate ? minDate : value));
 
   const weekdays = useMemo(() => {
     const names = format.weekdayNames();

@@ -43,6 +43,34 @@ const PATHS = {
     </>
   ),
   arrowRight: <path d="M5 12h13M13 6.5l5.5 5.5-5.5 5.5" />,
+  inbox: (
+    <>
+      <path d="M3.5 13.5 6 5.5h12l2.5 8V19a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 19z" />
+      <path d="M3.5 13.5h4.5l1.5 2.5h5l1.5-2.5h4.5" />
+    </>
+  ),
+  more: (
+    <>
+      <circle cx="6" cy="12" r="1.2" fill="currentColor" stroke="none" />
+      <circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none" />
+      <circle cx="18" cy="12" r="1.2" fill="currentColor" stroke="none" />
+    </>
+  ),
+  archive: (
+    <>
+      <rect x="3.5" y="4.5" width="17" height="4.5" rx="1" />
+      <path d="M5 9v9.5a1.5 1.5 0 0 0 1.5 1.5h11a1.5 1.5 0 0 0 1.5-1.5V9M10 13h4" />
+    </>
+  ),
+  pencil: <path d="M4 20h4L19 9a2.1 2.1 0 0 0-4-4L4 16zM13.5 6.5l4 4" />,
+  chevronDown: <path d="m6 9.5 6 6 6-6" />,
+  filter: <path d="M4 5.5h16l-6.2 7.3v5.7l-3.6 1.5v-7.2z" />,
+  noDate: (
+    <>
+      <rect x="3.5" y="5" width="17" height="15.5" rx="2.5" />
+      <path d="M3.5 10h17M8 3v4M16 3v4M9.5 13.5l5 5M14.5 13.5l-5 5" />
+    </>
+  ),
 } satisfies Record<string, ReactElement>;
 
 export type IconName = keyof typeof PATHS;

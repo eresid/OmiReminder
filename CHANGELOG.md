@@ -70,19 +70,19 @@ Tags as projects, reminders without a date, and tag filters in the Windows deskt
 
 ### Desktop app (Windows)
 
-- [ ] Tags as separate records in the local database: client-generated UUID `id`, name unique ignoring case, optional color, `archivedAt`, UTC `createdAt` and `updatedAt`, and soft delete with `deletedAt` (section 3.6). Reminders reference tags by `tagIds` instead of tag names. The initial schema is changed in place, without a migration, because there is no local data to keep: a local database from 0.1.0 must be deleted before starting 0.2.0.
-- [ ] Optional `dueDate` in the local database, validation, and IPC (section 3.1, FR-NODATE-1).
-- [ ] Sidebar "Tags" section: Inbox, non-archived tags with active reminder counts, creating a tag, and a collapsed "Archived" entry (FR-TAG-2, FR-TAG-4, FR-TAG-7).
-- [ ] Tag page and Inbox: overdue, by date, no date, and collapsed completed groups, with quick actions (FR-TAG-3, FR-TAG-4).
-- [ ] Tag menu: rename, change color, archive and unarchive, and delete with confirmation (FR-TAG-6 to FR-TAG-8).
-- [ ] Tags input on the full editing screen with suggestions from existing tags (FR-TAG-9).
-- [ ] Quick-add on a tag page or in Inbox defaults to "No date" and presets the tag as a removable chip (FR-TAG-5).
-- [ ] Reminders without a date: "No date" in the date-picker popup of quick-add and full editing, "Set date" quick action, and exclusion from the main screen, "All reminders", group counts, the tray badge, and the daily summary (FR-NODATE-1 to FR-NODATE-5).
-- [ ] Tag filter on the main screen and the "All reminders" screen: several tags and "No tag", hidden count with overdue, clear action, kept per screen until the app quits (FR-TAG-10 to FR-TAG-12, FR-MAIN-9).
+- [x] Tags as separate records in the local database: client-generated UUID `id`, name unique ignoring case, optional color, `archivedAt`, UTC `createdAt` and `updatedAt`, and soft delete with `deletedAt` (section 3.6). Reminders reference tags by `tagIds` instead of tag names. The initial schema is changed in place, without a migration, because there is no local data to keep: a local database from 0.1.0 must be deleted before starting 0.2.0.
+- [x] Optional `dueDate` in the local database, validation, and IPC (section 3.1, FR-NODATE-1).
+- [x] Sidebar "Tags" section: Inbox, non-archived tags with active reminder counts, creating a tag, and a collapsed "Archived" entry (FR-TAG-2, FR-TAG-4, FR-TAG-7).
+- [x] Tag page and Inbox: overdue, by date, no date, and collapsed completed groups, with quick actions (FR-TAG-3, FR-TAG-4).
+- [x] Tag menu: rename, change color, archive and unarchive, and delete with confirmation (FR-TAG-6 to FR-TAG-8).
+- [x] Tags input on the full editing screen with suggestions from existing tags (FR-TAG-9).
+- [x] Quick-add on a tag page or in Inbox defaults to "No date" and presets the tag as a removable chip (FR-TAG-5).
+- [x] Reminders without a date: "No date" in the date-picker popup of quick-add and full editing, "Set date" quick action, and exclusion from the main screen, "All reminders", group counts, the tray badge, and the daily summary (FR-NODATE-1 to FR-NODATE-5).
+- [x] Tag filter on the main screen and the "All reminders" screen: several tags and "No tag", hidden count with overdue, clear action, kept per screen until the app quits (FR-TAG-10 to FR-TAG-12, FR-MAIN-9).
 - [ ] "Reschedule all" for the overdue group: today, tomorrow, or a chosen date, with Undo. With a tag filter, only the visible reminders (FR-MAIN-8, FR-TAG-12).
 - [ ] Recalculate the main screen groups and the next summary time at local midnight, on resume, and after the device time zone changes (FR-MAIN-6, FR-NOT-1b). Midnight and resume are done; a real Windows time zone change is not verified yet.
-- [ ] Unit tests for tag validation and name uniqueness, tag deletion and archiving, tag page grouping, tag filters and hidden counts, and exclusion of reminders without a date from counts and the daily summary.
-- [ ] English and Ukrainian translations for all new strings.
+- [x] Unit tests for tag validation and name uniqueness, tag deletion and archiving, tag page grouping, tag filters and hidden counts, and exclusion of reminders without a date from counts and the daily summary.
+- [x] English and Ukrainian translations for all new strings.
 
 ## [0.1.0] — 26.09.2026
 

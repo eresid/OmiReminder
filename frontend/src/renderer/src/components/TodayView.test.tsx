@@ -1,6 +1,7 @@
 import { cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
-import { makeReminder } from "../../../shared/testUtils";
+import { EMPTY_TAG_FILTER } from "../../../shared/tagFilter";
+import { makeReminder, makeTag } from "../../../shared/testUtils";
 import { initI18n } from "../i18n";
 import { useAppStore } from "../store";
 import { TodayView } from "./TodayView";
@@ -14,6 +15,7 @@ describe("TodayView", () => {
 
   afterEach(() => {
     cleanup();
+    useAppStore.setState({ tags: [], filters: { today: EMPTY_TAG_FILTER, all: EMPTY_TAG_FILTER } });
   });
 
   it("shows overdue reminders first, then today and the next day with reminders", () => {
@@ -70,5 +72,48 @@ describe("TodayView", () => {
     render(<TodayView />);
     expect(screen.getByText("All clear for today")).toBeTruthy();
     expect(screen.queryByRole("region", { name: "Overdue" })).toBeNull();
+  });
+
+  it("filters by tag and says how many reminders are hidden, including overdue", () => {
+    const work = makeTag({ name: "Work" });
+    const home = makeTag({ name: "Home" });
+    useAppStore.setState({
+      today: TODAY,
+      tags: [work, home],
+      completed: [],
+      active: [
+        makeReminder({ title: "Report", dueDate: TODAY, tagIds: [work.id] }),
+        makeReminder({ title: "Late home task", dueDate: "2026-09-20", tagIds: [home.id] }),
+        makeReminder({ title: "Untagged", dueDate: TODAY }),
+        makeReminder({ title: "Someday work", dueDate: null, tagIds: [work.id] }),
+      ],
+      filters: { today: { tagIds: [work.id], untagged: false }, all: EMPTY_TAG_FILTER },
+    });
+
+    render(<TodayView />);
+
+    expect(screen.getByText("Report")).toBeTruthy();
+    expect(screen.queryByText("Late home task")).toBeNull();
+    expect(screen.queryByText("Untagged")).toBeNull();
+    // Reminders without a date are never on the main screen.
+    expect(screen.queryByText("Someday work")).toBeNull();
+    expect(screen.getByRole("status").textContent).toContain("2 hidden by the filter, 1 overdue");
+    expect(screen.getByRole("button", { name: "Filter by tag: Work" })).toBeTruthy();
+  });
+
+  it("shows an empty state with a clear action when nothing matches the filter", () => {
+    const work = makeTag({ name: "Work" });
+    useAppStore.setState({
+      today: TODAY,
+      tags: [work],
+      completed: [],
+      active: [makeReminder({ title: "Untagged", dueDate: TODAY })],
+      filters: { today: { tagIds: [work.id], untagged: false }, all: EMPTY_TAG_FILTER },
+    });
+
+    render(<TodayView />);
+
+    expect(screen.getByText("Nothing matches the filter")).toBeTruthy();
+    expect(screen.queryByText("All clear for today")).toBeNull();
   });
 });

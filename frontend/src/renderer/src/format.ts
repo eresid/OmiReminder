@@ -65,3 +65,9 @@ export function createDateFormatter(locale: string, today: string, t: TFunction)
     },
   };
 }
+
+/** "Yesterday", "Today", "Tomorrow", and weekdays do not show the date itself. */
+export function hasRelativeLabel(today: string, date: string): boolean {
+  const offset = daysBetween(today, date);
+  return offset >= -1 && offset < 7;
+}

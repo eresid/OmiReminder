@@ -2,11 +2,29 @@ import type { Reminder } from "./types";
 
 const PRIORITY_RANK = { high: 0, normal: 1, low: 2 } as const;
 
+/** A reminder that has a date. Only these are on the main screen and "All reminders" (FR-NODATE-1). */
+export type DatedReminder = Reminder & { dueDate: string };
+
+export function hasDate(reminder: Reminder): reminder is DatedReminder {
+  return reminder.dueDate !== null;
+}
+
+/** Dates in ascending order; reminders without a date go last. */
+function compareDueDates(a: string | null, b: string | null): number {
+  if (a === b) {
+    return 0;
+  }
+  if (a === null || b === null) {
+    return a === null ? 1 : -1;
+  }
+  return a.localeCompare(b);
+}
+
 /** Main screen order: priority (high first), then date (oldest first), then creation time. */
 export function compareForMainScreen(a: Reminder, b: Reminder): number {
   return (
     PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority] ||
-    a.dueDate.localeCompare(b.dueDate) ||
+    compareDueDates(a.dueDate, b.dueDate) ||
     a.createdAt.localeCompare(b.createdAt)
   );
 }
@@ -14,7 +32,7 @@ export function compareForMainScreen(a: Reminder, b: Reminder): number {
 /** "All reminders" order: date, then priority, then creation time. */
 export function compareByDate(a: Reminder, b: Reminder): number {
   return (
-    a.dueDate.localeCompare(b.dueDate) ||
+    compareDueDates(a.dueDate, b.dueDate) ||
     PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority] ||
     a.createdAt.localeCompare(b.createdAt)
   );
@@ -42,7 +60,9 @@ export interface MainScreenGroups {
 }
 
 export function groupForMainScreen(reminders: readonly Reminder[], today: string): MainScreenGroups {
-  const shown = reminders.filter((reminder) => reminder.status === "active" || reminder.status === "completed");
+  const shown = reminders
+    .filter(hasDate)
+    .filter((reminder) => reminder.status === "active" || reminder.status === "completed");
   const overdue = shown
     .filter((reminder) => reminder.status === "active" && reminder.dueDate < today)
     .sort(compareForMainScreen);
@@ -77,7 +97,7 @@ export function countAttention(reminders: readonly Reminder[], today: string): A
   let overdue = 0;
   let dueToday = 0;
   for (const reminder of reminders) {
-    if (reminder.status !== "active") {
+    if (reminder.status !== "active" || reminder.dueDate === null) {
       continue;
     }
     if (reminder.dueDate < today) {
@@ -87,4 +107,47 @@ export function countAttention(reminders: readonly Reminder[], today: string): A
     }
   }
   return { overdue, today: dueToday };
+}
+
+export interface DateGroup {
+  date: string;
+  reminders: Reminder[];
+}
+
+/** Groups by date in ascending order, each sorted by priority and creation time. */
+export function groupByDate(reminders: readonly DatedReminder[]): DateGroup[] {
+  const groups: DateGroup[] = [];
+  for (const reminder of [...reminders].sort(compareByDate)) {
+    const last = groups.at(-1);
+    if (last?.date === reminder.dueDate) {
+      last.reminders.push(reminder);
+    } else {
+      groups.push({ date: reminder.dueDate, reminders: [reminder] });
+    }
+  }
+  return groups;
+}
+
+export interface TagPageGroups {
+  overdue: Reminder[];
+  /** Active reminders due today or later, by date. */
+  dated: DateGroup[];
+  /** Active reminders without a date. */
+  undated: Reminder[];
+  /** The most recently completed first. */
+  completed: Reminder[];
+}
+
+/** Groups of a tag page or Inbox (FR-TAG-3, FR-TAG-4). */
+export function groupForTagPage(reminders: readonly Reminder[], today: string): TagPageGroups {
+  const active = reminders.filter((reminder) => reminder.status === "active");
+  const dated = active.filter(hasDate);
+  return {
+    overdue: dated.filter((reminder) => reminder.dueDate < today).sort(compareForMainScreen),
+    dated: groupByDate(dated.filter((reminder) => reminder.dueDate >= today)),
+    undated: active.filter((reminder) => reminder.dueDate === null).sort(compareForMainScreen),
+    completed: reminders
+      .filter((reminder) => reminder.status === "completed")
+      .sort((a, b) => (b.completedAt ?? "").localeCompare(a.completedAt ?? "")),
+  };
 }

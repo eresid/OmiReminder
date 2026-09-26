@@ -101,6 +101,15 @@ describe("daily summary content", () => {
     expect(buildDailySummary([done, makeReminder({ dueDate: "2026-09-26" })], "2026-09-26")?.todayCount).toBe(1);
   });
 
+  it("never includes reminders without a date", () => {
+    const undated = makeReminder({ title: "Someday", dueDate: null, priority: "high" });
+    expect(buildDailySummary([undated], "2026-09-26")).toBeNull();
+    expect(buildDailySummary([undated, makeReminder({ dueDate: "2026-09-26" })], "2026-09-26")).toMatchObject({
+      todayCount: 1,
+      overdueCount: 0,
+    });
+  });
+
   it("counts reminders and lists the first titles in main screen order", () => {
     const reminders = [
       makeReminder({ title: "Today normal", dueDate: "2026-09-26" }),

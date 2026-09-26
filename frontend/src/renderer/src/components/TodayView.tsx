@@ -2,6 +2,7 @@ import { useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { addDays } from "../../../shared/dates";
 import { countActive, groupForMainScreen } from "../../../shared/grouping";
+import { countHidden, isTagFilterActive, matchesTagFilter } from "../../../shared/tagFilter";
 import type { Reminder } from "../../../shared/types";
 import { useDateFormatter } from "../hooks";
 import { useAppStore } from "../store";
@@ -9,6 +10,7 @@ import { Icon } from "./Icon";
 import { DateMenu } from "./Pickers";
 import { Popover, usePopover } from "./Popover";
 import { ReminderRow } from "./ReminderRow";
+import { FilterEmptyState, HiddenNotice, TagFilterButton } from "./TagFilter";
 
 function RescheduleAllButton({ reminders }: { reminders: readonly Reminder[] }) {
   const { t } = useTranslation();
@@ -48,11 +50,17 @@ function RescheduleAllButton({ reminders }: { reminders: readonly Reminder[] }) 
   );
 }
 
-function AddReminderRow() {
+export function AddReminderRow() {
   const { t } = useTranslation();
   const openQuickAdd = useAppStore((state) => state.openQuickAdd);
   return (
-    <button type="button" className="add-row" onClick={openQuickAdd}>
+    <button
+      type="button"
+      className="add-row"
+      onClick={() => {
+        openQuickAdd();
+      }}
+    >
       <Icon name="plus" size={16} />
       {t("nav.addReminder")}
     </button>
@@ -66,16 +74,39 @@ export function TodayView() {
   const today = useAppStore((state) => state.today);
   const active = useAppStore((state) => state.active);
   const completed = useAppStore((state) => state.completed);
+  const filter = useAppStore((state) => state.filters.today);
   // Reminders completed for today or the next day stay in their group, struck through (FR-MAIN-7).
-  const groups = useMemo(() => groupForMainScreen([...active, ...completed], today), [active, completed, today]);
+  const { groups, hidden } = useMemo(() => {
+    const all = [...active, ...completed];
+    const unfiltered = groupForMainScreen(all, today);
+    const shown = [...unfiltered.overdue, ...unfiltered.today, ...(unfiltered.next?.reminders ?? [])];
+    return {
+      groups: groupForMainScreen(
+        all.filter((reminder) => matchesTagFilter(reminder, filter)),
+        today
+      ),
+      hidden: countHidden(
+        shown.filter((reminder) => reminder.status === "active"),
+        filter,
+        today
+      ),
+    };
+  }, [active, completed, today, filter]);
   const hasOverdue = groups.overdue.length > 0;
+  const nothingMatches = isTagFilterActive(filter) && !hasOverdue && groups.today.length === 0 && groups.next === null;
 
   return (
     <div className="view">
-      <header className="view-header">
-        <h1>{t("today.title")}</h1>
-        <p className="view-subtitle">{format.dayHeading(today)}</p>
+      <header className="view-header view-header-row">
+        <div>
+          <h1>{t("today.title")}</h1>
+          <p className="view-subtitle">{format.dayHeading(today)}</p>
+        </div>
+        <TagFilterButton screen="today" />
       </header>
+      <HiddenNotice screen="today" counts={hidden} />
+
+      {nothingMatches ? <FilterEmptyState screen="today" /> : null}
 
       {hasOverdue ? (
         <section className="group group-overdue" aria-labelledby="group-overdue">
@@ -92,28 +123,30 @@ export function TodayView() {
         </section>
       ) : null}
 
-      <section className="group" aria-labelledby={hasOverdue ? "group-today" : undefined}>
-        {hasOverdue ? (
-          <div className="group-header">
-            <h2 id="group-today">{t("dates.today")}</h2>
-            <span className="group-count">{countActive(groups.today)}</span>
-          </div>
-        ) : null}
-        {groups.today.length > 0 ? (
-          <ul className="rows">
-            {groups.today.map((reminder) => (
-              <ReminderRow key={reminder.id} reminder={reminder} showCompletedOn={false} />
-            ))}
-          </ul>
-        ) : (
-          <div className="empty-state">
-            <Icon name="check" size={22} />
-            <p className="empty-title">{t("today.emptyTitle")}</p>
-            <p className="empty-text">{t("today.emptyText")}</p>
-          </div>
-        )}
-        <AddReminderRow />
-      </section>
+      {nothingMatches ? null : (
+        <section className="group" aria-labelledby={hasOverdue ? "group-today" : undefined}>
+          {hasOverdue ? (
+            <div className="group-header">
+              <h2 id="group-today">{t("dates.today")}</h2>
+              <span className="group-count">{countActive(groups.today)}</span>
+            </div>
+          ) : null}
+          {groups.today.length > 0 ? (
+            <ul className="rows">
+              {groups.today.map((reminder) => (
+                <ReminderRow key={reminder.id} reminder={reminder} showCompletedOn={false} />
+              ))}
+            </ul>
+          ) : (
+            <div className="empty-state">
+              <Icon name="check" size={22} />
+              <p className="empty-title">{t("today.emptyTitle")}</p>
+              <p className="empty-text">{t("today.emptyText")}</p>
+            </div>
+          )}
+          <AddReminderRow />
+        </section>
+      )}
 
       {groups.next ? (
         <section className="group" aria-labelledby="group-next">

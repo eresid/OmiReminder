@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { compareByDate, countAttention, groupForMainScreen } from "./grouping";
+import { compareByDate, countAttention, groupForMainScreen, groupForTagPage } from "./grouping";
 import { makeReminder } from "./testUtils";
 
 const TODAY = "2026-09-25"; // Friday
@@ -80,9 +80,44 @@ describe("main screen groups", () => {
     expect(countAttention(reminders, TODAY)).toEqual({ overdue: 1, today: 2 });
   });
 
+  it("leaves reminders without a date out of the main screen and the counts", () => {
+    const undated = makeReminder({ dueDate: null, priority: "high" });
+    const today = makeReminder({ dueDate: TODAY });
+    const groups = groupForMainScreen([undated, today], TODAY);
+    expect(groups).toEqual({ overdue: [], today: [today], next: null });
+    expect(countAttention([undated, today], TODAY)).toEqual({ overdue: 0, today: 1 });
+  });
+
   it("orders the full list by date first", () => {
     const high = makeReminder({ dueDate: "2026-10-01", priority: "high" });
     const early = makeReminder({ dueDate: "2026-09-30", priority: "low" });
     expect([high, early].sort(compareByDate)).toEqual([early, high]);
+  });
+});
+
+describe("tag page groups", () => {
+  it("splits reminders into overdue, by date, no date, and completed", () => {
+    const overdue = makeReminder({ dueDate: "2026-09-20" });
+    const today = makeReminder({ dueDate: TODAY });
+    const laterLow = makeReminder({ dueDate: "2026-10-01", priority: "low" });
+    const laterHigh = makeReminder({ dueDate: "2026-10-01", priority: "high" });
+    const undatedLow = makeReminder({ dueDate: null, priority: "low" });
+    const undatedHigh = makeReminder({ dueDate: null, priority: "high" });
+    const doneFirst = makeReminder({ dueDate: null, status: "completed", completedAt: "2026-09-20T10:00:00.000Z" });
+    const doneLast = makeReminder({ dueDate: TODAY, status: "completed", completedAt: "2026-09-25T10:00:00.000Z" });
+    const archived = makeReminder({ status: "archived" });
+
+    const groups = groupForTagPage(
+      [laterLow, undatedLow, doneFirst, today, archived, undatedHigh, overdue, laterHigh, doneLast],
+      TODAY
+    );
+
+    expect(groups.overdue).toEqual([overdue]);
+    expect(groups.dated).toEqual([
+      { date: TODAY, reminders: [today] },
+      { date: "2026-10-01", reminders: [laterHigh, laterLow] },
+    ]);
+    expect(groups.undated).toEqual([undatedHigh, undatedLow]);
+    expect(groups.completed).toEqual([doneLast, doneFirst]);
   });
 });

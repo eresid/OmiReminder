@@ -26,19 +26,14 @@ function optionalText(row: Row, column: string): string | null {
   return typeof value === "string" ? value : null;
 }
 
-function parseTags(value: string): string[] {
-  const parsed: unknown = JSON.parse(value);
-  return Array.isArray(parsed) ? parsed.filter((tag): tag is string => typeof tag === "string") : [];
-}
-
-function toReminder(row: Row): Reminder {
+function toReminder(row: Row, tagIds: string[]): Reminder {
   return {
     id: text(row, "id"),
     title: text(row, "title"),
     description: text(row, "description"),
-    dueDate: text(row, "due_date"),
+    dueDate: optionalText(row, "due_date"),
     priority: text(row, "priority") as Priority,
-    tags: parseTags(text(row, "tags")),
+    tagIds,
     status: text(row, "status") as ReminderStatus,
     completedAt: optionalText(row, "completed_at"),
     createdAt: text(row, "created_at"),
@@ -48,6 +43,10 @@ function toReminder(row: Row): Reminder {
 
 export class ReminderNotFoundError extends Error {
   override name = "ReminderNotFoundError";
+}
+
+export class UnknownTagError extends Error {
+  override name = "UnknownTagError";
 }
 
 export class ReminderRepository {
@@ -68,7 +67,45 @@ export class ReminderRepository {
            ORDER BY due_date, created_at`
         : `SELECT * FROM reminders WHERE deleted_at IS NULL AND status = 'completed'
            ORDER BY completed_at DESC`;
-    return this.db.prepare(sql).all().map(toReminder);
+    const rows = this.db.prepare(sql).all();
+    const tagIds = this.allTagIds();
+    return rows.map((row) => toReminder(row, tagIds.get(text(row, "id")) ?? []));
+  }
+
+  private allTagIds(): Map<string, string[]> {
+    const result = new Map<string, string[]>();
+    const rows = this.db.prepare("SELECT reminder_id, tag_id FROM reminder_tags ORDER BY position").all();
+    for (const row of rows) {
+      const reminderId = text(row, "reminder_id");
+      const ids = result.get(reminderId) ?? [];
+      ids.push(text(row, "tag_id"));
+      result.set(reminderId, ids);
+    }
+    return result;
+  }
+
+  private tagIdsOf(id: string): string[] {
+    return this.db
+      .prepare("SELECT tag_id FROM reminder_tags WHERE reminder_id = :id ORDER BY position")
+      .all({ id })
+      .map((row) => text(row, "tag_id"));
+  }
+
+  /** Replaces the tags of a reminder. Every tag must exist and not be deleted. */
+  private writeTagIds(id: string, tagIds: readonly string[]): void {
+    const exists = this.db.prepare("SELECT 1 AS found FROM tags WHERE id = :tagId AND deleted_at IS NULL");
+    for (const tagId of tagIds) {
+      if (!exists.get({ tagId })) {
+        throw new UnknownTagError(`Tag ${tagId} was not found`);
+      }
+    }
+    this.db.prepare("DELETE FROM reminder_tags WHERE reminder_id = :id").run({ id });
+    const insert = this.db.prepare(
+      "INSERT INTO reminder_tags (reminder_id, tag_id, position) VALUES (:id, :tagId, :position)"
+    );
+    tagIds.forEach((tagId, position) => {
+      insert.run({ id, tagId, position });
+    });
   }
 
   get(id: string): Reminder {
@@ -76,40 +113,47 @@ export class ReminderRepository {
     if (!row) {
       throw new ReminderNotFoundError(`Reminder ${id} was not found`);
     }
-    return toReminder(row);
+    return toReminder(row, this.tagIdsOf(id));
   }
 
   create(input: NewReminderInput): Reminder {
     const id = this.newId();
     const timestamp = this.timestamp();
-    this.db
-      .prepare(
-        `INSERT INTO reminders (id, title, due_date, priority, created_at, updated_at)
-         VALUES (:id, :title, :dueDate, :priority, :timestamp, :timestamp)`
-      )
-      .run({ id, title: input.title, dueDate: input.dueDate, priority: input.priority, timestamp });
+    inTransaction(this.db, () => {
+      this.db
+        .prepare(
+          `INSERT INTO reminders (id, title, due_date, priority, created_at, updated_at)
+           VALUES (:id, :title, :dueDate, :priority, :timestamp, :timestamp)`
+        )
+        .run({ id, title: input.title, dueDate: input.dueDate, priority: input.priority, timestamp });
+      this.writeTagIds(id, input.tagIds);
+    });
     return this.get(id);
   }
 
   update(id: string, patch: ReminderPatch): Reminder {
     const current = this.get(id);
     const next = { ...current, ...patch };
-    this.db
-      .prepare(
-        `UPDATE reminders
-         SET title = :title, description = :description, due_date = :dueDate,
-             priority = :priority, tags = :tags, updated_at = :updatedAt
-         WHERE id = :id`
-      )
-      .run({
-        id,
-        title: next.title,
-        description: next.description,
-        dueDate: next.dueDate,
-        priority: next.priority,
-        tags: JSON.stringify(next.tags),
-        updatedAt: this.timestamp(),
-      });
+    inTransaction(this.db, () => {
+      this.db
+        .prepare(
+          `UPDATE reminders
+           SET title = :title, description = :description, due_date = :dueDate,
+               priority = :priority, updated_at = :updatedAt
+           WHERE id = :id`
+        )
+        .run({
+          id,
+          title: next.title,
+          description: next.description,
+          dueDate: next.dueDate,
+          priority: next.priority,
+          updatedAt: this.timestamp(),
+        });
+      if (patch.tagIds) {
+        this.writeTagIds(id, patch.tagIds);
+      }
+    });
     return this.get(id);
   }
 
@@ -141,7 +185,10 @@ export class ReminderRepository {
       .run({ id, status, completedAt: status === "completed" ? timestamp : null, timestamp });
   }
 
-  /** Changes several due dates at once. Used by reschedule, "Reschedule all", and Undo. */
+  /**
+   * Changes several due dates at once. Used by reschedule, "Reschedule all", "Set date", and Undo,
+   * which can restore `null` for a reminder that had no date.
+   */
   setDueDates(changes: readonly DueDateChange[]): void {
     inTransaction(this.db, () => {
       const statement = this.db.prepare(

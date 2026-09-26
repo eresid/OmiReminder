@@ -8,9 +8,8 @@ export const migrations: readonly string[] = [
     id TEXT PRIMARY KEY,
     title TEXT NOT NULL,
     description TEXT NOT NULL DEFAULT '',
-    due_date TEXT NOT NULL,
+    due_date TEXT,
     priority TEXT NOT NULL CHECK (priority IN ('low', 'normal', 'high')),
-    tags TEXT NOT NULL DEFAULT '[]',
     status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'completed', 'archived')),
     completed_at TEXT,
     created_at TEXT NOT NULL,
@@ -18,6 +17,24 @@ export const migrations: readonly string[] = [
     deleted_at TEXT
   );
   CREATE INDEX reminders_status_due_date ON reminders (status, due_date);
+  CREATE TABLE tags (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    name_key TEXT NOT NULL,
+    color TEXT,
+    archived_at TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    deleted_at TEXT
+  );
+  CREATE UNIQUE INDEX tags_name_key ON tags (name_key) WHERE deleted_at IS NULL;
+  CREATE TABLE reminder_tags (
+    reminder_id TEXT NOT NULL REFERENCES reminders (id),
+    tag_id TEXT NOT NULL REFERENCES tags (id),
+    position INTEGER NOT NULL,
+    PRIMARY KEY (reminder_id, tag_id)
+  );
+  CREATE INDEX reminder_tags_tag_id ON reminder_tags (tag_id);
   CREATE TABLE settings (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL

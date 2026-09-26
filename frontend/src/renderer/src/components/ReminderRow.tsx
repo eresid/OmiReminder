@@ -7,6 +7,7 @@ import { useAppStore } from "../store";
 import { Icon } from "./Icon";
 import { DateMenu } from "./Pickers";
 import { Popover, usePopover } from "./Popover";
+import { TagDot } from "./TagDot";
 
 const COMPLETE_ANIMATION_MS = 220;
 
@@ -16,9 +17,11 @@ interface ReminderRowProps {
   showDate?: boolean;
   /** Show when a completed reminder was completed. The main screen hides it. */
   showCompletedOn?: boolean;
+  /** A tag page does not repeat its own tag in the rows. */
+  hideTagId?: string;
 }
 
-export function ReminderRow({ reminder, showDate = false, showCompletedOn = true }: ReminderRowProps) {
+export function ReminderRow({ reminder, showDate = false, showCompletedOn = true, hideTagId }: ReminderRowProps) {
   const { t } = useTranslation();
   const format = useDateFormatter();
   const today = useAppStore((state) => state.today);
@@ -26,13 +29,16 @@ export function ReminderRow({ reminder, showDate = false, showCompletedOn = true
   const reopenReminder = useAppStore((state) => state.reopenReminder);
   const reschedule = useAppStore((state) => state.reschedule);
   const openEditor = useAppStore((state) => state.openEditor);
+  const tags = useAppStore((state) => state.tags);
   // The version of the reminder being completed. Any change to the reminder ends the animation.
   const [completingVersion, setCompletingVersion] = useState<string | null>(null);
   const rescheduleRef = useRef<HTMLButtonElement>(null);
   const popover = usePopover();
 
   const isCompleted = reminder.status === "completed";
-  const isOverdue = !isCompleted && reminder.dueDate < today;
+  const isOverdue = !isCompleted && reminder.dueDate !== null && reminder.dueDate < today;
+  // For a reminder without a date, the reschedule action sets the date (FR-NODATE-4).
+  const rescheduleLabel = reminder.dueDate === null ? t("reminder.setDate") : t("reminder.reschedule");
   const completing = !isCompleted && completingVersion === reminder.updatedAt;
 
   function toggleCompleted(): void {
@@ -55,7 +61,7 @@ export function ReminderRow({ reminder, showDate = false, showCompletedOn = true
         </span>
       );
     }
-  } else if (showDate) {
+  } else if (showDate && reminder.dueDate !== null) {
     meta.push(
       <span key="date" className={isOverdue ? "tone-danger" : ""}>
         <Icon name="calendar" size={13} />
@@ -70,12 +76,16 @@ export function ReminderRow({ reminder, showDate = false, showCompletedOn = true
       </span>
     );
   }
-  for (const tag of reminder.tags) {
-    meta.push(
-      <span key={`tag-${tag}`} className="tag">
-        #{tag}
-      </span>
-    );
+  for (const tagId of reminder.tagIds) {
+    const tag = tags.find((item) => item.id === tagId);
+    if (tag && tag.id !== hideTagId) {
+      meta.push(
+        <span key={`tag-${tag.id}`} className="tag">
+          <TagDot color={tag.color} />
+          {tag.name}
+        </span>
+      );
+    }
   }
 
   return (
@@ -115,8 +125,8 @@ export function ReminderRow({ reminder, showDate = false, showCompletedOn = true
             ref={rescheduleRef}
             type="button"
             className="icon-button"
-            aria-label={t("reminder.reschedule")}
-            title={t("reminder.reschedule")}
+            aria-label={rescheduleLabel}
+            title={rescheduleLabel}
             onClick={popover.toggle}
           >
             <Icon name="calendar" size={16} />
@@ -126,7 +136,7 @@ export function ReminderRow({ reminder, showDate = false, showCompletedOn = true
             open={popover.open}
             onClose={popover.close}
             align="end"
-            label={t("reminder.reschedule")}
+            label={rescheduleLabel}
           >
             <DateMenu
               value={reminder.dueDate}

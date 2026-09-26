@@ -6,14 +6,19 @@ export type Language = "en" | "uk";
 
 export type Theme = "system" | "light" | "dark";
 
+export const TAG_COLORS = ["red", "orange", "yellow", "green", "teal", "blue", "purple", "pink"] as const;
+
+export type TagColor = (typeof TAG_COLORS)[number];
+
 export interface Reminder {
   id: string;
   title: string;
   description: string;
-  /** Calendar date in `YYYY-MM-DD` format. It has no time and no time zone. */
-  dueDate: string;
+  /** Calendar date in `YYYY-MM-DD` format, or `null` for a reminder without a date (section 3.7). */
+  dueDate: string | null;
   priority: Priority;
-  tags: string[];
+  /** IDs of the reminder's tags, in the order they were added. */
+  tagIds: string[];
   status: ReminderStatus;
   /** UTC timestamp in ISO 8601 format, set while the reminder is completed. */
   completedAt: string | null;
@@ -21,23 +26,47 @@ export interface Reminder {
   updatedAt: string;
 }
 
+/** A project that groups reminders (section 3.6). */
+export interface Tag {
+  id: string;
+  name: string;
+  /** `null` means the neutral color. */
+  color: TagColor | null;
+  /** UTC timestamp, set while the tag is archived. */
+  archivedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface NewReminderInput {
   title: string;
-  dueDate: string;
+  dueDate: string | null;
   priority: Priority;
+  tagIds: string[];
 }
 
 export interface ReminderPatch {
   title?: string;
   description?: string;
-  dueDate?: string;
+  dueDate?: string | null;
   priority?: Priority;
-  tags?: string[];
+  tagIds?: string[];
 }
 
 export interface DueDateChange {
   id: string;
-  dueDate: string;
+  dueDate: string | null;
+}
+
+export interface NewTagInput {
+  name: string;
+  color: TagColor | null;
+}
+
+export interface TagPatch {
+  name?: string;
+  color?: TagColor | null;
+  archived?: boolean;
 }
 
 export interface Settings {
@@ -56,7 +85,8 @@ export interface Environment {
   today: string;
 }
 
-export type View = "today" | "all" | "settings";
+/** A tag page is `tag:<id>`. Inbox lists reminders without tags (FR-TAG-4). */
+export type View = "today" | "all" | "inbox" | "settings" | `tag:${string}`;
 
 export type NavigationTarget = View | "quick-add";
 
@@ -71,8 +101,15 @@ export interface OmiApi {
   completeReminder(id: string): Promise<void>;
   reopenReminder(id: string): Promise<void>;
   setDueDates(changes: DueDateChange[]): Promise<void>;
+  /** All non-deleted tags, including archived ones. */
+  listTags(): Promise<Tag[]>;
+  createTag(input: NewTagInput): Promise<Tag>;
+  updateTag(id: string, patch: TagPatch): Promise<Tag>;
+  /** Soft-deletes the tag and removes it from its reminders (FR-TAG-8). */
+  deleteTag(id: string): Promise<void>;
   getSettings(): Promise<Settings>;
   updateSettings(patch: Partial<Settings>): Promise<Settings>;
+  /** Called after any change to reminders or tags. */
   onRemindersChanged(listener: () => void): () => void;
   onTodayChanged(listener: (today: string) => void): () => void;
   onNavigate(listener: (target: NavigationTarget) => void): () => void;
