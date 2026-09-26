@@ -243,7 +243,7 @@ Local storage:
 
 ### 10.5 Build, packaging, and updates
 
-- The desktop app is packaged with **electron-builder**: NSIS installer for Windows, DMG for macOS, AppImage and deb for Linux.
+- The desktop app is packaged with **electron-builder**: NSIS installer for Windows, DMG for macOS, AppImage and deb for Linux. Until the installer is added, Windows builds are unsigned portable executables (see [README.md](README.md)).
 - Automatic updates use **electron-updater** with GitHub Releases as the update source.
 - Release builds must be code-signed (Windows) and signed and notarized (macOS). Otherwise the OS shows security warnings and auto-update does not work on macOS.
 - The extension is built with Vite into a zip archive for the Chrome Web Store.

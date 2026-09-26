@@ -21,7 +21,6 @@ function windowBackground(): string {
   return nativeTheme.shouldUseDarkColors ? "#1c1c1e" : "#ffffff";
 }
 
-const APP_ID = "net.omisoft.omireminder";
 const HIDDEN_ARGUMENT = "--hidden";
 
 app.setName("OmiReminder");
@@ -38,9 +37,10 @@ if (!app.requestSingleInstanceLock()) {
 }
 
 function start(): void {
-  // Windows shows notifications only for a known app ID. In development the Electron binary is
-  // used as the ID, because there is no Start menu shortcut with the app ID.
-  app.setAppUserModelId(app.isPackaged ? APP_ID : process.execPath);
+  // Windows shows notifications only for a known app ID. The appId from electron-builder.yml needs a
+  // Start menu shortcut, which only the installer (version 0.5) creates. Until then, development and
+  // portable builds use the executable path as the ID.
+  app.setAppUserModelId(process.execPath);
   Menu.setApplicationMenu(null);
 
   const db = openDatabase(join(app.getPath("userData"), "omireminder.sqlite"));
@@ -183,7 +183,9 @@ function start(): void {
   function applyLaunchAtStartup(enabled: boolean): void {
     // In development this would register the bare Electron binary, so only installed builds do it.
     if (app.isPackaged) {
-      app.setLoginItemSettings({ openAtLogin: enabled, args: [HIDDEN_ARGUMENT] });
+      // A portable build runs from a temporary folder; start the original .exe instead.
+      const path = process.env.PORTABLE_EXECUTABLE_FILE ?? process.execPath;
+      app.setLoginItemSettings({ openAtLogin: enabled, path, args: [HIDDEN_ARGUMENT] });
     }
   }
 

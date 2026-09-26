@@ -4,6 +4,7 @@
   "private": true,
   "description": "OmiReminder desktop app",
   "license": "MIT",
+  "author": "Yevhen Sakara",
   "main": "./out/main/index.js",
   "packageManager": "pnpm@12.6.0",
   "engines": {
@@ -14,19 +15,13 @@
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "preview": "electron-vite preview",
+    "package": "electron-vite build && electron-builder",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.node.json --noEmit && tsc -p tsconfig.web.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"
-  },
-  "dependencies": {
-    "i18next": "26.4.2",
-    "react": "19.3.0",
-    "react-dom": "19.3.0",
-    "react-i18next": "17.0.15",
-    "zustand": "5.0.15"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
@@ -37,16 +32,22 @@
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "5.2.0",
     "electron": "44.4.5",
+    "electron-builder": "26.15.3",
     "electron-vite": "5.0.0",
     "eslint": "10.11.0",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-react-hooks": "7.1.1",
     "globals": "17.12.0",
+    "i18next": "26.4.2",
     "jsdom": "30.1.1",
     "prettier": "3.9.9",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-i18next": "17.0.15",
     "typescript": "6.0.3",
     "typescript-eslint": "8.70.1",
     "vite": "7.3.6",
-    "vitest": "5.0.2"
+    "vitest": "5.0.2",
+    "zustand": "5.0.15"
   }
 }

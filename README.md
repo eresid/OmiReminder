@@ -45,6 +45,39 @@ The desktop app needs Node.js 22.13 or later (Node.js 24 LTS recommended) and pn
 
 The renderer dev server (`http://localhost:5173`) can also be opened in a regular browser. It then uses in-memory sample data instead of the local database.
 
+## Building the Windows app
+
+Version 0.1 is built as a portable app that runs without installation. An installer, code signing, and automatic updates are planned for version 0.5.
+
+1. Complete the steps in [Development](#development). `pnpm` must be available as a command, so run `corepack enable` if you have not done it yet.
+2. In `frontend/`, run:
+
+   ```bash
+   pnpm package
+   ```
+
+   The first run downloads the Electron and packaging tools, so it takes a few minutes.
+3. The results are in `frontend/dist/`:
+
+   | File or folder | What it is |
+   |---|---|
+   | `OmiReminder-0.1.0-portable.exe` | A single file to copy anywhere and run. On each start it unpacks itself to a temporary folder, so it starts a little slower. |
+   | `win-unpacked/` | The same app as a folder. Start `OmiReminder.exe` inside it. It starts faster, but the whole folder must be kept together. |
+
+### Running the app
+
+1. Move `OmiReminder-0.1.0-portable.exe` (or the `win-unpacked` folder) to a permanent place first, for example `%LOCALAPPDATA%\Programs\OmiReminder`. Launch at startup, which is on by default, remembers the path the app was started from, so running it from `dist/` and later deleting that folder leaves a broken startup entry.
+2. Start the `.exe`. The build is not code-signed, so Windows SmartScreen may show "Windows protected your PC". Select **More info**, then **Run anyway**. This is expected until code signing is added in version 0.5.
+3. The app opens its window and stays in the system tray. Closing the window hides it to the tray; use **Quit** in the tray menu to exit.
+
+Reminders and settings are stored in `%APPDATA%\OmiReminder`, separately from development data. They are kept when you replace the `.exe` with a newer build.
+
+### Removing the app
+
+1. Turn off **Launch at startup** in settings, or remove OmiReminder in **Settings → Apps → Startup** in Windows.
+2. Quit the app from the tray menu and delete the `.exe` or the `win-unpacked` folder.
+3. To remove all reminders too, delete `%APPDATA%\OmiReminder`.
+
 ## Status
 
 The project is in its initial planning stage. The Windows desktop app comes first, followed by macOS, Linux, and the Chrome extension. See [CHANGELOG.md](CHANGELOG.md) for the version plan.

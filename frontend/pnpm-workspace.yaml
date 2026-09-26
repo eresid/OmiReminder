@@ -1,3 +1,5 @@
 # Project-local pnpm settings. This file does not define a workspace.
 allowBuilds:
   esbuild: true
+  # Only used for Squirrel installers, which this project does not build.
+  electron-winstaller: false

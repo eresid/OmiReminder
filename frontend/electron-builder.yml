@@ -1,0 +1,27 @@
+# Packaging for version 0.1: an unsigned portable build for Windows.
+# The NSIS installer, code signing, and automatic updates are planned for version 0.5.
+appId: net.omisoft.omireminder
+productName: OmiReminder
+copyright: Copyright (c) 2026 Yevhen Sakara
+
+directories:
+  output: dist
+  buildResources: build
+
+# electron-vite bundles all code into out/, so no node_modules are needed at runtime.
+files:
+  - out/**/*
+  - package.json
+
+win:
+  icon: build/icon.png
+  target:
+    # A single .exe that runs without installation.
+    - target: portable
+      arch: x64
+    # The same app as a plain folder with OmiReminder.exe.
+    - target: dir
+      arch: x64
+
+portable:
+  artifactName: ${productName}-${version}-portable.exe

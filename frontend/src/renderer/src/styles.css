@@ -24,6 +24,8 @@
   --priority-high: #d9730d;
   --priority-normal: #9b9b9b;
   --priority-low: #c9c9c6;
+  --flag-normal: #3b6fd8;
+  --flag-low: #9b9b9b;
   --shadow: 0 1px 2px rgb(0 0 0 / 6%), 0 8px 28px rgb(0 0 0 / 12%);
   --toast-bg: #262626;
   --toast-text: #f5f5f5;
@@ -62,6 +64,8 @@
     --priority-high: #ffa24d;
     --priority-normal: #75757b;
     --priority-low: #4d4d52;
+    --flag-normal: #7fa2ff;
+    --flag-low: #8a8a90;
     --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 10px 32px rgb(0 0 0 / 45%);
     --toast-bg: #ececec;
     --toast-text: #1c1c1e;
@@ -90,6 +94,8 @@
   --priority-high: #ffa24d;
   --priority-normal: #75757b;
   --priority-low: #4d4d52;
+  --flag-normal: #7fa2ff;
+  --flag-low: #8a8a90;
   --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 10px 32px rgb(0 0 0 / 45%);
   --toast-bg: #ececec;
   --toast-text: #1c1c1e;
@@ -585,17 +591,20 @@ p {
   background: var(--bg-hover);
 }
 
+/* Priorities differ by color and by fill, so they stay distinct in both themes and without color. */
 .priority-high .priority-flag {
   color: var(--priority-high);
-  fill: color-mix(in srgb, var(--priority-high) 25%, transparent);
+  fill: var(--priority-high);
 }
 
 .priority-normal .priority-flag {
-  color: var(--text-muted);
+  color: var(--flag-normal);
+  fill: color-mix(in srgb, var(--flag-normal) 30%, transparent);
 }
 
 .priority-low .priority-flag {
-  color: var(--text-faint);
+  color: var(--flag-low);
+  fill: none;
 }
 
 .segmented {

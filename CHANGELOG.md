@@ -93,6 +93,7 @@ A local Windows desktop app: one-time date-based reminders, a main screen with o
 - [x] Launch at system startup, on by default, with a setting to turn it off (FR-DESK-3).
 - [x] Settings screen: language, launch at startup, and a locally stored daily notification time (FR-SET-1a).
 - [x] Theme setting: system (default), light, or dark (FR-SET-4).
+- [x] Unsigned portable Windows build with `pnpm package` (electron-builder): a portable `.exe` and an unpacked folder. Build and run instructions in README.md.
 - [ ] Recalculate the main screen groups and the next summary time at local midnight, on resume, and after the device time zone changes (FR-MAIN-6, FR-NOT-1b). Midnight and resume are done; a real Windows time zone change is not verified yet.
 - [x] Unit tests for the local database layer, main screen grouping and sorting, and daily summary scheduling.
 
@@ -101,7 +102,7 @@ A local Windows desktop app: one-time date-based reminders, a main screen with o
 Each later version gets a detailed checklist when work on it starts.
 
 - **0.4.0 — Privacy and monitoring.** Sentry in the backend and desktop app, server-side metrics, Google Analytics with consent, consent management in settings, Privacy Policy, and account deletion (sections 2.1, 2.2, 10.9 to 10.11).
-- **0.5.0 — First public Windows release.** Stage and production deployment on DigitalOcean, NSIS installer with code signing, and automatic updates through GitHub Releases (section 10.5). "Repeat after completion": every N days, weeks, or months from the completion date, in the model, API, sync, and desktop app (FR-REC-8).
+- **0.5.0 — First public Windows release.** Stage and production deployment on DigitalOcean, NSIS installer with code signing, and automatic updates through GitHub Releases (section 10.5). The installer switches the notification app ID from the executable path to the `appId` (see `frontend/src/main/index.ts`). "Repeat after completion": every N days, weeks, or months from the completion date, in the model, API, sync, and desktop app (FR-REC-8).
 - **0.6.0 — macOS and Linux.** Signed and notarized DMG, AppImage and deb packages, platform-specific tray and startup behavior, and release builds for all three platforms in CI.
 - **0.7.0 — Chrome extension: core.** Extension setup, sign-in, registration, compact quick-add and full editing of date-only reminders, the main screen in the popup, a locally stored daily notification time, the theme setting, IndexedDB cache, and sync.
 - **0.8.0 — Chrome extension: notifications and release.** Daily summary as a browser notification with `chrome.alarms`, including on a late start, toolbar icon badge (FR-EXT-4), "Remind me about this page" (FR-EXT-5), Sentry and Google Analytics in the extension, and Chrome Web Store publication.
