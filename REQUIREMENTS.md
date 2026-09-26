@@ -89,7 +89,9 @@ The registration form has two separate checkboxes. Both are unchecked by default
 - **FR-REM-2.** A separate "All reminders" screen lists reminders with sorting by date and priority, and filtering by tag, priority, and status.
 - **FR-REM-3.** Search reminders by title and description.
 - **FR-REM-4.** Mark a reminder as completed.
-- **FR-REM-5.** The reminder form asks for a date only. It has no time-of-day or time-zone selector.
+- **FR-REM-5.** Creating a reminder uses a compact quick-add form: one required `Title` input, with `Today` (the default due date) and `Normal` (the default priority) shown as small clickable buttons in one row beneath it, followed by the create action. The initial form has no separate date, priority, repeat, description, or tags fields.
+- **FR-REM-5a.** Clicking the date button opens a date-picker popup. The user can choose another date and configure `Repeat` in that popup. The chosen date or recurrence is reflected on the button when the popup closes. There is no time-of-day or time-zone control.
+- **FR-REM-5b.** Clicking the priority button lets the user choose `low`, `normal`, or `high`. Description and tags are available only after creation, on the full reminder editing screen; that screen also allows changing title, date, recurrence, and priority.
 - **FR-REM-6.** Reschedule a reminder to another date: "Tomorrow" as a quick option, or any future date from a date picker. It never asks for a duration in minutes or hours.
 - **FR-REM-6a.** For a one-time reminder, rescheduling changes its `dueDate`. For a recurring reminder, it defers only the current occurrence to the chosen date; the recurrence anchor and future occurrences remain unchanged. Occurrence-specific deferrals are synced as date-only data.
 
