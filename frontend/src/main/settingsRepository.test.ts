@@ -5,10 +5,18 @@ import { SettingsRepository } from "./settingsRepository";
 describe("SettingsRepository", () => {
   it("returns defaults and stores changes", () => {
     const settings = new SettingsRepository(openDatabase(":memory:"), "uk");
-    expect(settings.get()).toEqual({ language: "uk", launchAtStartup: true, notificationTime: "09:00" });
+    expect(settings.get()).toEqual({
+      language: "uk",
+      theme: "system",
+      launchAtStartup: true,
+      notificationTime: "09:00",
+    });
 
-    expect(settings.update({ launchAtStartup: false, notificationTime: "07:45", language: "en" })).toEqual({
+    expect(
+      settings.update({ launchAtStartup: false, notificationTime: "07:45", language: "en", theme: "dark" })
+    ).toEqual({
       language: "en",
+      theme: "dark",
       launchAtStartup: false,
       notificationTime: "07:45",
     });

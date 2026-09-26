@@ -16,6 +16,11 @@ import { ReminderRepository } from "./reminderRepository";
 import { SettingsRepository } from "./settingsRepository";
 import { formatDailySummary } from "./summaryText";
 
+/** Matches `--bg` in the renderer, so the window does not flash while it loads. */
+function windowBackground(): string {
+  return nativeTheme.shouldUseDarkColors ? "#1c1c1e" : "#ffffff";
+}
+
 const APP_ID = "net.omisoft.omireminder";
 const HIDDEN_ARGUMENT = "--hidden";
 
@@ -42,6 +47,8 @@ function start(): void {
   const reminders = new ReminderRepository(db);
   const settings = new SettingsRepository(db, resolveLanguage(app.getPreferredSystemLanguages()));
   settings.ensureLanguage();
+  // The renderer follows this through `prefers-color-scheme`, and so do native controls.
+  nativeTheme.themeSource = settings.get().theme;
 
   let i18n: i18n = createMainI18n(settings.get().language);
   let mainWindow: BrowserWindow | null = null;
@@ -80,7 +87,7 @@ function start(): void {
       show: false,
       title: "OmiReminder",
       icon: createAppIcon(),
-      backgroundColor: nativeTheme.shouldUseDarkColors ? "#1c1c1e" : "#ffffff",
+      backgroundColor: windowBackground(),
       webPreferences: {
         preload: join(__dirname, "../preload/index.js"),
         contextIsolation: true,
@@ -199,6 +206,10 @@ function start(): void {
       if (previous.language !== next.language) {
         i18n = createMainI18n(next.language);
         tray.setI18n(i18n);
+      }
+      if (previous.theme !== next.theme) {
+        nativeTheme.themeSource = next.theme;
+        mainWindow?.setBackgroundColor(windowBackground());
       }
       if (previous.launchAtStartup !== next.launchAtStartup) {
         applyLaunchAtStartup(next.launchAtStartup);

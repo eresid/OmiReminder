@@ -1,10 +1,11 @@
 import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { isValidTime } from "../../../shared/summary";
-import type { Language } from "../../../shared/types";
+import type { Language, Theme } from "../../../shared/types";
 import { useAppStore } from "../store";
 
 const LANGUAGES: readonly Language[] = ["en", "uk"];
+const THEMES: readonly Theme[] = ["system", "light", "dark"];
 
 function SettingRow({
   label,
@@ -40,6 +41,7 @@ export function SettingsView() {
   const [draftTime, setDraftTime] = useState<string | null>(null);
   const time = draftTime ?? settings.notificationTime;
   const languageId = useId();
+  const themeId = useId();
   const startupId = useId();
   const timeId = useId();
 
@@ -63,6 +65,26 @@ export function SettingsView() {
               {LANGUAGES.map((language) => (
                 <option key={language} value={language}>
                   {t(`languages.${language}`)}
+                </option>
+              ))}
+            </select>
+          </span>
+        </SettingRow>
+
+        <SettingRow label={t("settings.theme")} hint={t("settings.themeHint")} controlId={themeId}>
+          <span className="select-wrap">
+            <select
+              id={themeId}
+              className="select"
+              aria-describedby={`${themeId}-hint`}
+              value={settings.theme}
+              onChange={(event) => {
+                void updateSettings({ theme: event.target.value as Theme });
+              }}
+            >
+              {THEMES.map((theme) => (
+                <option key={theme} value={theme}>
+                  {t(`themes.${theme}`)}
                 </option>
               ))}
             </select>

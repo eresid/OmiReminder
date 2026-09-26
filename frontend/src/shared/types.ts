@@ -4,6 +4,8 @@ export type ReminderStatus = "active" | "completed" | "archived";
 
 export type Language = "en" | "uk";
 
+export type Theme = "system" | "light" | "dark";
+
 export interface Reminder {
   id: string;
   title: string;
@@ -40,6 +42,8 @@ export interface DueDateChange {
 
 export interface Settings {
   language: Language;
+  /** `system` follows the OS light or dark mode. */
+  theme: Theme;
   launchAtStartup: boolean;
   /** Local clock time of the daily summary in `HH:MM` format. */
   notificationTime: string;

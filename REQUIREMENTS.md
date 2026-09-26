@@ -166,6 +166,7 @@ Local storage:
 | Setting | Default | Clients | Scope |
 |---|---|---|---|
 | Language | OS language | desktop, extension | device |
+| Theme: system, light, or dark | system | desktop, extension | device |
 | Notification channels | see FR-NOT-2 | desktop | device |
 | Browser notifications | on | extension | device |
 | Launch at system startup | on | desktop | device |
@@ -176,10 +177,11 @@ Local storage:
 | Streaks (FR-STAT-1) | on | all clients | account |
 | Usage statistics | as chosen at registration | desktop, extension | account |
 
-- **FR-SET-1.** Device settings (language, notification channels, app behavior, and daily notification time) are stored only on the device.
+- **FR-SET-1.** Device settings (language, theme, notification channels, app behavior, and daily notification time) are stored only on the device.
 - **FR-SET-1a.** The user can choose one daily notification time separately on each client. It is the time of the daily summary (FR-NOT-1). This clock time stays local and is never sent to the backend or synced to other devices.
 - **FR-SET-2.** Account settings (date and time preferences) are stored on the server and synced to all clients of the account, like reminders.
 - **FR-SET-3.** Until account settings are set, their defaults come from the OS locale.
+- **FR-SET-4.** The theme follows the OS light or dark mode by default and updates when the OS mode changes. The user can choose "System", "Light", or "Dark" in settings. In the desktop app the choice also applies to native controls.
 
 ## 7. Localization
 

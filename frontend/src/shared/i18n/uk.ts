@@ -73,11 +73,18 @@ export const uk = {
     title: "Налаштування",
     language: "Мова",
     languageHint: "Мова застосунку і формат дат.",
+    theme: "Тема",
+    themeHint: "Системна тема повторює світлий або темний режим комп’ютера.",
     launchAtStartup: "Запускати разом із системою",
     launchAtStartupHint: "OmiReminder запускатиметься в треї після входу в систему.",
     notificationTime: "Щоденне зведення",
     notificationTimeHint:
       "Одне сповіщення на день про прострочені та сьогоднішні нагадування. Зберігається лише на цьому пристрої.",
+  },
+  themes: {
+    system: "Системна",
+    light: "Світла",
+    dark: "Темна",
   },
   languages: {
     en: "English",

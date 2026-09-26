@@ -39,8 +39,9 @@
   -webkit-font-smoothing: antialiased;
 }
 
+/* The theme follows the OS unless the user picks light or dark in settings (`data-theme`). */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #1c1c1e;
     --bg-sidebar: #19191b;
     --bg-hover: #29292c;
@@ -65,6 +66,37 @@
     --toast-bg: #ececec;
     --toast-text: #1c1c1e;
   }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #1c1c1e;
+  --bg-sidebar: #19191b;
+  --bg-hover: #29292c;
+  --bg-selected: #262b40;
+  --bg-elevated: #26262a;
+  --text: #ececec;
+  --text-muted: #a1a1a6;
+  --text-faint: #6f6f75;
+  --border: #2c2c30;
+  --border-strong: #3a3a3f;
+  --accent: #7c93ff;
+  --accent-hover: #93a6ff;
+  --accent-text: #11131c;
+  --accent-soft: #252b44;
+  --danger: #ff7b72;
+  --danger-soft: #3a2322;
+  --today: #5cc98f;
+  --priority-high: #ffa24d;
+  --priority-normal: #75757b;
+  --priority-low: #4d4d52;
+  --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 10px 32px rgb(0 0 0 / 45%);
+  --toast-bg: #ececec;
+  --toast-text: #1c1c1e;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
 }
 
 *,

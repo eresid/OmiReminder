@@ -1,7 +1,15 @@
 import { isValidDateOnly } from "./dates";
 import { isLanguage } from "./locale";
 import { isValidTime } from "./summary";
-import type { DueDateChange, NewReminderInput, Priority, ReminderListKind, ReminderPatch, Settings } from "./types";
+import type {
+  DueDateChange,
+  NewReminderInput,
+  Priority,
+  ReminderListKind,
+  ReminderPatch,
+  Settings,
+  Theme,
+} from "./types";
 
 export const TITLE_MAX_LENGTH = 500;
 export const DESCRIPTION_MAX_LENGTH = 10_000;
@@ -135,6 +143,10 @@ export function validateDueDateChanges(value: unknown): DueDateChange[] {
   });
 }
 
+export function isTheme(value: unknown): value is Theme {
+  return value === "system" || value === "light" || value === "dark";
+}
+
 export function validateSettingsPatch(value: unknown): Partial<Settings> {
   if (!isRecord(value)) {
     throw new ValidationError("Invalid settings");
@@ -145,6 +157,12 @@ export function validateSettingsPatch(value: unknown): Partial<Settings> {
       throw new ValidationError("Invalid language");
     }
     patch.language = value.language;
+  }
+  if (value.theme !== undefined) {
+    if (!isTheme(value.theme)) {
+      throw new ValidationError("Invalid theme");
+    }
+    patch.theme = value.theme;
   }
   if (value.launchAtStartup !== undefined) {
     if (typeof value.launchAtStartup !== "boolean") {

@@ -13,6 +13,7 @@ import type {
 import { api } from "./api";
 import { createDateFormatter } from "./format";
 import { changeLanguage, i18next } from "./i18n";
+import { applyTheme } from "./theme";
 
 export interface Toast {
   id: number;
@@ -75,7 +76,7 @@ export const useAppStore = create<AppStore>()((set, get) => {
   return {
     ready: false,
     environment: { systemLocale: "en-US", firstDayOfWeek: 1, today: "1970-01-01" },
-    settings: { language: "en", launchAtStartup: true, notificationTime: "09:00" },
+    settings: { language: "en", theme: "system", launchAtStartup: true, notificationTime: "09:00" },
     today: "1970-01-01",
     active: [],
     completed: [],
@@ -87,6 +88,7 @@ export const useAppStore = create<AppStore>()((set, get) => {
     async init() {
       const [environment, settings] = await Promise.all([api.getEnvironment(), api.getSettings()]);
       await changeLanguage(settings.language);
+      applyTheme(settings.theme);
       set({ environment, settings, today: environment.today });
       await get().reload();
       set({ ready: true });
@@ -165,6 +167,7 @@ export const useAppStore = create<AppStore>()((set, get) => {
         if (settings.language !== get().settings.language) {
           await changeLanguage(settings.language);
         }
+        applyTheme(settings.theme);
         set({ settings });
       }),
     showToast(message, undo) {

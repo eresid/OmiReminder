@@ -72,10 +72,17 @@ export const en = {
     title: "Settings",
     language: "Language",
     languageHint: "Language of the app and date formats.",
+    theme: "Theme",
+    themeHint: "System follows the light or dark mode of your computer.",
     launchAtStartup: "Launch at startup",
     launchAtStartupHint: "Start OmiReminder in the tray when you sign in.",
     notificationTime: "Daily summary",
     notificationTimeHint: "One notification per day with overdue and today reminders. Saved on this device only.",
+  },
+  themes: {
+    system: "System",
+    light: "Light",
+    dark: "Dark",
   },
   languages: {
     en: "English",

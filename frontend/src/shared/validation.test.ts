@@ -47,5 +47,7 @@ describe("validation", () => {
     });
     expect(() => validateSettingsPatch({ notificationTime: "8:30" })).toThrow(ValidationError);
     expect(() => validateSettingsPatch({ language: "de" })).toThrow(ValidationError);
+    expect(validateSettingsPatch({ theme: "light" })).toEqual({ theme: "light" });
+    expect(() => validateSettingsPatch({ theme: "blue" })).toThrow(ValidationError);
   });
 });

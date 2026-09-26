@@ -11,7 +11,7 @@ import {
 export function createMockApi(): OmiApi {
   const today = toDateOnly(new Date());
   const changeListeners = new Set<() => void>();
-  let settings: Settings = { language: "en", launchAtStartup: true, notificationTime: "09:00" };
+  let settings: Settings = { language: "en", theme: "system", launchAtStartup: true, notificationTime: "09:00" };
   let sequence = 0;
 
   function sample(title: string, offset: number, priority: Priority = "normal"): Reminder {
