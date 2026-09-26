@@ -17,12 +17,18 @@ export default tseslint.config(
     },
   },
   {
-    files: ["**/*.{js,mjs}"],
+    files: ["**/*.{js,mjs,cjs}"],
     ...tseslint.configs.disableTypeChecked,
   },
   {
     files: ["src/main/**/*.ts", "src/preload/**/*.ts", "*.config.{ts,mjs}"],
     languageOptions: { globals: globals.node },
+  },
+  {
+    // electron-builder hooks are CommonJS scripts that run in Node.js.
+    files: ["**/*.cjs"],
+    languageOptions: { sourceType: "commonjs", globals: globals.node },
+    rules: { "@typescript-eslint/no-require-imports": "off" },
   },
   {
     files: ["src/renderer/**/*.{ts,tsx}"],

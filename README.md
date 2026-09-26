@@ -64,6 +64,8 @@ Version 0.1 is built as a portable app that runs without installation. An instal
    | `OmiReminder-0.1.0-portable.exe` | A single file to copy anywhere and run. On each start it unpacks itself to a temporary folder, so it starts a little slower. |
    | `win-unpacked/` | The same app as a folder. Start `OmiReminder.exe` inside it. It starts faster, but the whole folder must be kept together. |
 
+   To keep the build small, only the English and Ukrainian Chromium UI files are included, and the 20 MB Chromium license file is replaced by `LICENSES.txt`, which links to that file in the official Electron release.
+
 ### Running the app
 
 1. Move `OmiReminder-0.1.0-portable.exe` (or the `win-unpacked` folder) to a permanent place first, for example `%LOCALAPPDATA%\Programs\OmiReminder`. Launch at startup, which is on by default, remembers the path the app was started from, so running it from `dist/` and later deleting that folder leaves a broken startup entry.
