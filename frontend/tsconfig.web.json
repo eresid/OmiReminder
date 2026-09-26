@@ -16,5 +16,6 @@
     "resolveJsonModule": true,
     "composite": true
   },
-  "include": ["src/renderer/**/*", "src/preload/*.d.ts"]
+  "include": ["src/renderer/**/*", "src/shared/**/*"],
+  "exclude": ["src/shared/**/*.test.ts", "src/shared/timeZoneTestUtils.ts"]
 }

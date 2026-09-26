@@ -71,6 +71,7 @@ The registration form has two separate checkboxes. Both are unchecked by default
 | `tags` | no | List of strings. |
 | `recurrence` | no | See 3.2. Empty means a one-time reminder. |
 | `status` | yes | `active`, `completed`, or `archived`. |
+| `completedAt` | no | UTC timestamp of completion, set while the reminder is completed. |
 | `createdAt`, `updatedAt` | yes | UTC timestamps. |
 | `deletedAt` | no | Soft-delete marker, needed for sync. |
 | `version` | yes | Increased by the server on every change. Used for sync. |
@@ -92,7 +93,7 @@ The registration form has two separate checkboxes. Both are unchecked by default
 - **FR-REM-2.** A separate "All reminders" screen lists reminders with sorting by date and priority, and filtering by tag, priority, and status.
 - **FR-REM-3.** Search reminders by title and description.
 - **FR-REM-4.** Mark a reminder as completed.
-- **FR-REM-5.** Creating a reminder uses a compact quick-add form: one required `Title` input, with `Today` (the default due date) and `Normal` (the default priority) shown as small clickable buttons in one row beneath it, followed by the create action. The initial form has no separate date, priority, repeat, description, or tags fields.
+- **FR-REM-5.** Creating a reminder uses a compact quick-add form: one required `Title` input, with `Today` (the default due date) and `Normal` (the default priority) shown as small clickable buttons in one row beneath it, followed by the create action. The initial form has no separate date, priority, repeat, description, or tags fields. Inside the app, `Ctrl+N` (`Cmd+N` on macOS) or `Q` opens it.
 - **FR-REM-5a.** Clicking the date button opens a date-picker popup. The user can choose another date and configure `Repeat` in that popup. The chosen date or recurrence is reflected on the button when the popup closes. There is no time-of-day or time-zone control.
 - **FR-REM-5b.** Clicking the priority button lets the user choose `low`, `normal`, or `high`. Description and tags are available only after creation, on the full reminder editing screen; that screen also allows changing title, date, recurrence, and priority.
 - **FR-REM-6.** Reschedule a reminder to another date: "Tomorrow" as a quick option, or any future date from a date picker. It never asks for a duration in minutes or hours.
@@ -191,7 +192,7 @@ Local storage:
 
 - **FR-DESK-1.** Runs on Windows, macOS, and Linux. Windows is supported first, and the other platforms follow in later versions (see [CHANGELOG.md](CHANGELOG.md)).
 - **FR-DESK-2.** Lives in the system tray. Closing the main window hides it to the tray instead of quitting. The tray menu has "Open", "New reminder", and "Quit".
-- **FR-DESK-3.** Launch at system startup, controlled by a setting that is on by default.
+- **FR-DESK-3.** Launch at system startup, controlled by a setting that is on by default. After launch at startup the app starts hidden in the tray.
 - **FR-DESK-4.** Only one instance of the app runs at a time.
 - **FR-DESK-5.** Automatic updates (see 10.5).
 - **FR-DESK-6.** The tray icon shows a badge with the number of overdue reminders plus reminders due today. The badge is red when at least one reminder is overdue and neutral otherwise, shows "9+" above 9, and is hidden when the number is 0. The tray tooltip shows the counts separately, for example "2 overdue, 3 today". The badge updates together with the main screen groups (FR-MAIN-6). The icon is drawn by the app, so it does not depend on taskbar badge support, which is not available while the window is hidden to the tray.

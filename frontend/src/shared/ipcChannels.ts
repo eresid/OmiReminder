@@ -1,0 +1,15 @@
+export const IpcChannel = {
+  getEnvironment: "environment:get",
+  listReminders: "reminders:list",
+  createReminder: "reminders:create",
+  updateReminder: "reminders:update",
+  deleteReminder: "reminders:delete",
+  completeReminder: "reminders:complete",
+  reopenReminder: "reminders:reopen",
+  setDueDates: "reminders:set-due-dates",
+  getSettings: "settings:get",
+  updateSettings: "settings:update",
+  remindersChanged: "reminders:changed",
+  todayChanged: "clock:today-changed",
+  navigate: "app:navigate",
+} as const;

@@ -35,6 +35,16 @@ The backend is hosted on DigitalOcean and remains independent of provider-specif
 
 Each directory is an independent project with its own `package.json`.
 
+## Development
+
+The desktop app needs Node.js 22.13 or later (Node.js 24 LTS recommended) and pnpm. Enable pnpm once with `corepack enable`, then run in `frontend/`:
+
+- `pnpm install` installs dependencies and downloads the Electron binary.
+- `pnpm dev` starts the app with hot reload. Development data is stored in `%APPDATA%\OmiReminder-dev`.
+- `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm build` run the checks.
+
+The renderer dev server (`http://localhost:5173`) can also be opened in a regular browser. It then uses in-memory sample data instead of the local database.
+
 ## Status
 
 The project is in its initial planning stage. The Windows desktop app comes first, followed by macOS, Linux, and the Chrome extension. See [CHANGELOG.md](CHANGELOG.md) for the version plan.

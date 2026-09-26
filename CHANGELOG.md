@@ -70,30 +70,30 @@ A local Windows desktop app: one-time date-based reminders, a main screen with o
 
 ### Repository
 
-- [ ] `.editorconfig` and shared Prettier settings.
-- [ ] GitHub Actions: a job for `frontend/` that runs format check, lint, type check, tests, and build.
+- [x] `.editorconfig` and shared Prettier settings.
+- [x] GitHub Actions: a job for `frontend/` that runs format check, lint, type check, tests, and build.
 
 ### Desktop app (Windows)
 
 - [x] Project setup: Electron, electron-vite, React, TypeScript (`strict`), Vite, Zustand, i18next, ESLint, Prettier, Vitest.
-- [ ] Localization with English and Ukrainian. Language from the OS, English as fallback, changeable in settings (section 7).
-- [ ] Local SQLite database in the Electron main process, with schema migrations (section 5).
-- [ ] Reminder storage with the fields from section 3.1 that do not depend on the server: client-generated UUID `id`, title, description, date-only `dueDate`, priority, tags, status, UTC `createdAt` and `updatedAt`.
-- [ ] Main screen: overdue (red, at the top), today, and the next day that has reminders, sorted by priority within each group (FR-MAIN-1 to FR-MAIN-6).
-- [ ] "All reminders" screen sorted by date and priority (FR-REM-2).
-- [ ] Compact quick-add for one-time reminders: Title, Today date button, Normal priority button, and create action. The date button opens a calendar popup (FR-REM-5, FR-REM-5a).
-- [ ] Full reminder editing after creation, including description and tags (FR-REM-5b); view and delete one-time reminders (FR-REM-1).
-- [ ] Mark a reminder as completed from the main screen, with Undo (FR-REM-4, FR-MAIN-7).
-- [ ] Reschedule a reminder: "Tomorrow" or a date picker (FR-REM-6).
-- [ ] One daily summary notification with OS notification and sound at the locally configured daily notification time, only when there are overdue or today reminders. Clicking it opens the main screen (FR-NOT-1, FR-NOT-2, FR-NOT-4).
-- [ ] Show the daily summary on a late start if it was missed that day, and never more than once per day (FR-NOT-1a, FR-NOT-5).
-- [ ] System tray with "Open", "New reminder", and "Quit". Closing the window hides it to the tray (FR-DESK-2).
-- [ ] Tray icon badge with the number of overdue and today reminders, red when anything is overdue, and a tooltip with both counts (FR-DESK-6).
-- [ ] Only one running instance (FR-DESK-4).
-- [ ] Launch at system startup, on by default, with a setting to turn it off (FR-DESK-3).
-- [ ] Settings screen: language, launch at startup, and a locally stored daily notification time (FR-SET-1a).
-- [ ] Recalculate the main screen groups and the next summary time at local midnight, on resume, and after the device time zone changes (FR-MAIN-6, FR-NOT-1b).
-- [ ] Unit tests for the local database layer, main screen grouping and sorting, and daily summary scheduling.
+- [x] Localization with English and Ukrainian. Language from the OS, English as fallback, changeable in settings (section 7).
+- [x] Local SQLite database in the Electron main process, with schema migrations (section 5).
+- [x] Reminder storage with the fields from section 3.1 that do not depend on the server: client-generated UUID `id`, title, description, date-only `dueDate`, priority, tags, status, UTC `createdAt` and `updatedAt`.
+- [x] Main screen: overdue (red, at the top), today, and the next day that has reminders, sorted by priority within each group (FR-MAIN-1 to FR-MAIN-6).
+- [x] "All reminders" screen sorted by date and priority (FR-REM-2).
+- [x] Compact quick-add for one-time reminders: Title, Today date button, Normal priority button, and create action. The date button opens a calendar popup (FR-REM-5, FR-REM-5a).
+- [x] Full reminder editing after creation, including description and tags (FR-REM-5b); view and delete one-time reminders (FR-REM-1).
+- [x] Mark a reminder as completed from the main screen, with Undo (FR-REM-4, FR-MAIN-7).
+- [x] Reschedule a reminder: "Tomorrow" or a date picker (FR-REM-6).
+- [x] One daily summary notification with OS notification and sound at the locally configured daily notification time, only when there are overdue or today reminders. Clicking it opens the main screen (FR-NOT-1, FR-NOT-2, FR-NOT-4).
+- [x] Show the daily summary on a late start if it was missed that day, and never more than once per day (FR-NOT-1a, FR-NOT-5).
+- [x] System tray with "Open", "New reminder", and "Quit". Closing the window hides it to the tray (FR-DESK-2).
+- [x] Tray icon badge with the number of overdue and today reminders, red when anything is overdue, and a tooltip with both counts (FR-DESK-6).
+- [x] Only one running instance (FR-DESK-4).
+- [x] Launch at system startup, on by default, with a setting to turn it off (FR-DESK-3).
+- [x] Settings screen: language, launch at startup, and a locally stored daily notification time (FR-SET-1a).
+- [ ] Recalculate the main screen groups and the next summary time at local midnight, on resume, and after the device time zone changes (FR-MAIN-6, FR-NOT-1b). Midnight and resume are done; a real Windows time zone change is not verified yet.
+- [x] Unit tests for the local database layer, main screen grouping and sorting, and daily summary scheduling.
 
 ## Later versions
 
