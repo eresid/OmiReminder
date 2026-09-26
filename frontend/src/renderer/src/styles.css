@@ -22,6 +22,8 @@
   --danger-soft: #fdeeed;
   --today: #1f7a4d;
   --priority-high: #d9730d;
+  /* Darker than --priority-high, so small text keeps a 4.5:1 contrast. */
+  --priority-high-text: #b05a06;
   --priority-normal: #9b9b9b;
   --priority-low: #c9c9c6;
   --flag-normal: #3b6fd8;
@@ -73,6 +75,7 @@
     --danger-soft: #3a2322;
     --today: #5cc98f;
     --priority-high: #ffa24d;
+    --priority-high-text: #ffa24d;
     --priority-normal: #75757b;
     --priority-low: #4d4d52;
     --flag-normal: #7fa2ff;
@@ -103,6 +106,7 @@
   --danger-soft: #3a2322;
   --today: #5cc98f;
   --priority-high: #ffa24d;
+  --priority-high-text: #ffa24d;
   --priority-normal: #75757b;
   --priority-low: #4d4d52;
   --flag-normal: #7fa2ff;
@@ -450,11 +454,13 @@ p {
 .check.priority-high {
   border-color: var(--priority-high);
   border-width: 2px;
-  background: color-mix(in srgb, var(--priority-high) 10%, transparent);
+  background: color-mix(in srgb, var(--priority-high) 18%, transparent);
 }
 
+/* Low priority differs by shape too, not only by a lighter color (FR-MAIN-10). */
 .check.priority-low {
-  border-color: var(--priority-low);
+  border-color: var(--text-faint);
+  border-style: dashed;
 }
 
 .check:hover {
@@ -470,6 +476,7 @@ p {
   color: var(--bg);
   background: var(--text-faint);
   border-color: var(--text-faint);
+  border-style: solid;
 }
 
 .row-main {
@@ -483,6 +490,19 @@ p {
 
 .row-title {
   overflow-wrap: anywhere;
+}
+
+.row.is-low-priority:not(.is-completed) .row-title {
+  color: var(--text-muted);
+}
+
+.row-priority.priority-high {
+  color: var(--priority-high-text);
+  font-weight: 600;
+}
+
+.row-priority.priority-low {
+  color: var(--text-muted);
 }
 
 .row.is-completed .row-title {

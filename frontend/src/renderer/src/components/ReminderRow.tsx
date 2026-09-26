@@ -53,6 +53,19 @@ export function ReminderRow({ reminder, showDate = false, showCompletedOn = true
   }
 
   const meta: React.ReactNode[] = [];
+  // Only priorities other than normal are marked, by icon and text as well as color (FR-MAIN-10).
+  if (!isCompleted && reminder.priority !== "normal") {
+    meta.push(
+      <span key="priority" className={`row-priority priority-${reminder.priority}`}>
+        <Icon
+          name={reminder.priority === "high" ? "flag" : "arrowDown"}
+          size={13}
+          className={reminder.priority === "high" ? "priority-flag" : undefined}
+        />
+        {t(`priority.${reminder.priority}`)}
+      </span>
+    );
+  }
   if (isCompleted) {
     if (showCompletedOn && reminder.completedAt) {
       meta.push(
@@ -93,6 +106,7 @@ export function ReminderRow({ reminder, showDate = false, showCompletedOn = true
       className={[
         "row",
         isCompleted ? "is-completed" : "",
+        reminder.priority === "low" ? "is-low-priority" : "",
         completing ? "is-completing" : "",
         popover.open ? "is-active" : "",
       ]

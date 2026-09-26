@@ -81,6 +81,7 @@ Tags as projects, reminders without a date, and tag filters in the Windows deskt
 - [x] Tag filter on the main screen and the "All reminders" screen: several tags and "No tag", hidden count with overdue, clear action, kept per screen until the app quits (FR-TAG-10 to FR-TAG-12, FR-MAIN-9).
 - [ ] "Reschedule all" for the overdue group: today, tomorrow, or a chosen date, with Undo. With a tag filter, only the visible reminders (FR-MAIN-8, FR-TAG-12).
 - [ ] Recalculate the main screen groups and the next summary time at local midnight, on resume, and after the device time zone changes (FR-MAIN-6, FR-NOT-1b). Midnight and resume are done; a real Windows time zone change is not verified yet.
+- [x] Priority in reminder rows: high and low are marked by the check circle and by a flag or arrow with text, normal stays plain (FR-MAIN-10).
 - [x] Unit tests for tag validation and name uniqueness, tag deletion and archiving, tag page grouping, tag filters and hidden counts, and exclusion of reminders without a date from counts and the daily summary.
 - [x] English and Ukrainian translations for all new strings.
 

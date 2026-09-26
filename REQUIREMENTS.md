@@ -118,6 +118,15 @@ The registration form has two separate checkboxes. Both are unchecked by default
 - **FR-MAIN-7.** A reminder completed for today or for the shown next day stays in its group, struck through, below the active items and in the order of completion. A short "Undo" option appears after completing, and clicking the struck item marks it as not completed again. Completed overdue items leave the main screen. Group counts, the tray badge, and the daily summary count only active reminders.
 - **FR-MAIN-8.** The overdue group header has a "Reschedule all" action that moves every overdue reminder at once to today, tomorrow, or a date chosen in a date picker. Each reminder is rescheduled as in FR-REM-6a. The action can be undone with a short "Undo" option. While a tag filter is active, it moves only the visible overdue reminders (FR-TAG-12).
 - **FR-MAIN-9.** The main screen has a tag filter (FR-TAG-10). Reminders without a date are never on the main screen (FR-NODATE-1).
+- **FR-MAIN-10.** Every reminder list (the main screen, "All reminders", tag pages, and Inbox) shows the priority of active items, not only through sorting. Only priorities other than normal are marked, so most rows stay plain. Priorities differ by color, by the shape of the check circle, and by text, so color is never the only signal:
+
+  | Priority | Check circle | Row details |
+  |---|---|---|
+  | High | Solid, thicker, filled with a tint of the priority color | A flag icon and "High" in the priority color |
+  | Normal | Solid, as today | Nothing |
+  | Low | Dashed and gray; the title is muted | A down arrow and "Low" in a muted color |
+
+  The flag is the same icon as on the priority button (FR-REM-5b). The priority text keeps sufficient contrast in light and dark themes. Completed items do not show the priority text.
 
 ### 3.5 Progress
 

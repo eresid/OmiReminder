@@ -64,6 +64,7 @@ const PATHS = {
   ),
   pencil: <path d="M4 20h4L19 9a2.1 2.1 0 0 0-4-4L4 16zM13.5 6.5l4 4" />,
   chevronDown: <path d="m6 9.5 6 6 6-6" />,
+  arrowDown: <path d="M12 5v13M6.5 12.5 12 18l5.5-5.5" />,
   filter: <path d="M4 5.5h16l-6.2 7.3v5.7l-3.6 1.5v-7.2z" />,
   noDate: (
     <>
