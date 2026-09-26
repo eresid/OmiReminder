@@ -62,14 +62,11 @@ The registration form has two separate checkboxes. Both are unchecked by default
 | `id` | yes | UUID generated on the client, so records can be created offline. |
 | `title` | yes | Short text. |
 | `description` | no | Longer text. |
-| `dueAt` | yes | Date and time of the (first) occurrence, stored in UTC. |
-| `timeZone` | yes | IANA time zone name, for example `Europe/Kyiv`. |
+| `dueDate` | yes | Calendar date of the (first) occurrence, stored as a date-only `YYYY-MM-DD` value, for example `2026-10-01`. No time or time zone is stored with a reminder. Do not interpret it as midnight UTC. |
 | `priority` | yes | `low`, `normal`, or `high`. Default: `normal`. |
 | `tags` | no | List of strings. |
 | `recurrence` | no | See 3.2. Empty means a one-time reminder. |
-| `advanceNoticeMinutes` | no | Minutes before each occurrence for one additional notification. Empty means no advance notification. |
 | `status` | yes | `active`, `completed`, or `archived`. |
-| `snoozedUntil` | no | UTC date and time, set when the user snoozes a notification. |
 | `createdAt`, `updatedAt` | yes | UTC timestamps. |
 | `deletedAt` | no | Soft-delete marker, needed for sync. |
 | `version` | yes | Increased by the server on every change. Used for sync. |
@@ -77,13 +74,11 @@ The registration form has two separate checkboxes. Both are unchecked by default
 ### 3.2 Recurrence
 
 - **FR-REC-1.** Supported frequencies: once, daily, weekly, monthly, yearly.
-- **FR-REC-2.** Weekly recurrence repeats on the weekday of `dueAt`.
+- **FR-REC-2.** Weekly recurrence repeats on the weekday of `dueDate`.
 - **FR-REC-3.** Monthly recurrence repeats on the same day of the month. If the month has no such day (for example the 31st), the reminder fires on the last day of that month.
 - **FR-REC-4.** Yearly recurrence repeats on the same date. A reminder set for 29 February fires on 28 February in non-leap years.
-- **FR-REC-5.** Occurrences are calculated in the reminder's `timeZone`, so a daily 09:00 reminder stays at 09:00 local time across daylight saving changes.
+- **FR-REC-5.** Recurrence produces calendar dates only. Each client uses its own daily notification time in the current system time zone to schedule alerts for those dates. Two clients may notify at different times for the same reminder.
 - **FR-REC-6.** Completing an occurrence of a recurring reminder moves it to the next occurrence. The user can also stop the recurrence.
-- **FR-REC-7.** If a recurrence falls at a local time skipped by a daylight saving transition, move that occurrence to the nearest valid local time after the gap.
-- **FR-REC-8.** If a recurrence falls at a local time that occurs twice because clocks go back, the reminder fires only at the first of the two moments.
 
 ### 3.3 Operations
 
@@ -91,11 +86,13 @@ The registration form has two separate checkboxes. Both are unchecked by default
 - **FR-REM-2.** List reminders with sorting by date and priority, and filtering by tag, priority, and status.
 - **FR-REM-3.** Search reminders by title and description.
 - **FR-REM-4.** Mark a reminder as completed.
+- **FR-REM-5.** The reminder form asks for a date only. It has no time-of-day or time-zone selector.
 
 ## 4. Notifications
 
-- **FR-NOT-1.** When a reminder is due, the client notifies the user through the enabled channels.
-- **FR-NOT-1a.** By default, notifications fire at the exact due date and time. For each reminder, the user may enable one additional advance notification with a checkbox and choose how many minutes before the occurrence it fires. The notification at the due time still fires.
+- **FR-NOT-1.** On a reminder's due date, each client notifies the user at its configured daily notification time in the device's current local time zone. The backend stores only the date and does not schedule client notifications.
+- **FR-NOT-1b.** Each client recalculates upcoming notifications when it starts, resumes, or detects a time-zone or daily notification time change. A due-date alert configured for 09:00 must fire at 09:00 local time after the user moves from France to the United States.
+- **FR-NOT-1c.** If the configured local notification time does not exist on a due date because clocks move forward, notify at the nearest valid local time after the gap. If that local time occurs twice because clocks move back, notify only at the first occurrence.
 - **FR-NOT-2.** Channels in the desktop app:
 
   | Channel | Default |
@@ -106,13 +103,14 @@ The registration form has two separate checkboxes. Both are unchecked by default
 
   Each channel can be turned on or off in settings.
 - **FR-NOT-3.** The extension shows notifications through `chrome.notifications` and schedules them with `chrome.alarms`.
-- **FR-NOT-4.** From a notification the user can open the reminder, mark it as completed, or snooze it (for example 5, 15, or 60 minutes, or 1 day).
+- **FR-NOT-4.** From a notification the user can open the reminder, mark it as completed, or choose Snooze. Snooze opens a date-picker popup so the user can choose a future date. It never asks for a duration in minutes or hours. The selected date is saved and synced; the reminder notifies again on that date at the client's local daily notification time.
+- **FR-NOT-4a.** For a one-time reminder, Snooze changes its `dueDate`. For a recurring reminder, Snooze defers only the selected occurrence to the chosen date; the recurrence anchor and future occurrences remain unchanged. Occurrence-specific deferrals are synced as date-only data.
 - **FR-NOT-5.** Reminders that became due while the client was not running are shown as missed when the client starts. If several occurrences of the same recurring reminder were missed, show only the latest missed notification for that reminder.
 - **FR-NOT-5a.** Every running client of the account shows its own notification for a due reminder, even if another client already did. This ensures no reminder is missed. Deduplication between clients may be added later.
 - **FR-NOT-6 (future).** Email notifications.
 - **FR-NOT-7 (future).** Telegram notifications.
 
-Future channels are sent by the backend, so the notification model must allow server-side delivery later.
+Future channels are sent by the backend. Their scheduling policy needs a time zone reported by a client or separately configured by the user; this is deferred until those channels are designed.
 
 ## 5. Offline mode and sync
 
@@ -139,10 +137,11 @@ Local storage:
 | Launch at system startup | on | desktop | device |
 | First day of the week | from OS locale | desktop, extension | account |
 | Time format (12 or 24 hours) | from OS locale | desktop, extension | account |
-| Default snooze duration | 15 minutes | desktop, extension | account |
+| Daily notification time | 09:00 | desktop, extension | device |
 | Usage statistics | as chosen at registration | desktop, extension | account |
 
-- **FR-SET-1.** Device settings (language, notifications, app behavior) are stored only on the device.
+- **FR-SET-1.** Device settings (language, notification channels, app behavior, and daily notification time) are stored only on the device.
+- **FR-SET-1a.** The user can choose one daily notification time separately on each client. It applies to all reminders on their due dates. This clock time stays local and is never sent to the backend or synced to other devices.
 - **FR-SET-2.** Account settings (date and time preferences) are stored on the server and synced to all clients of the account, like reminders.
 - **FR-SET-3.** Until account settings are set, their defaults come from the OS locale.
 
@@ -197,7 +196,7 @@ Local storage:
 - Test runner: **Vitest** in all three projects. It works with Vite and TypeScript without extra configuration and has a Jest-compatible API. It also runs backend tests.
 - Backend integration tests use Supertest against the Express app and an in-memory MongoDB (`mongodb-memory-server`).
 - Integration tests are written together with the features, starting from the first endpoint.
-- Recurrence, time zone, and sync logic must have unit tests, including the edge cases in 3.2. Daylight saving transitions (FR-REC-7 and FR-REC-8) must be tested for both a skipped hour and a repeated hour, in time zones of both hemispheres.
+- Recurrence date calculations, date-only sync, local notification scheduling, time-zone changes, and Snooze date changes must have unit tests. Daylight saving transitions (FR-NOT-1c) must be tested for both a skipped hour and a repeated hour, in time zones of both hemispheres.
 - Account deletion must have integration tests that check no user data remains on the server.
 
 ### 10.5 Build, packaging, and updates
@@ -270,9 +269,10 @@ Analytics has two levels.
 - Email and Telegram notifications (planned, see 4).
 - Email verification and password reset (planned for version 2, see 2).
 - Deduplication of notifications between clients (see FR-NOT-5a).
-- Multiple advance notifications for one reminder.
+- Per-reminder time-of-day and advance notifications.
 - Sharing reminders between users.
 
 ## 12. Open questions
 
 - MongoDB deployment option: DigitalOcean Managed MongoDB, MongoDB Atlas, or self-hosted on DigitalOcean.
+- Time-zone policy for future backend-delivered email and Telegram notifications when an account is used in multiple time zones.

@@ -6,9 +6,10 @@ See [REQUIREMENTS.md](REQUIREMENTS.md) for the full requirements.
 
 ## Features
 
-- Reminders with title, description, date and time, priority, tags, and recurrence (daily, weekly, monthly, yearly)
+- Date-only reminders with title, description, priority, tags, and recurrence (daily, weekly, monthly, yearly)
 - Notifications through OS notifications, sound, and a pop-up window, each configurable
-- Snooze and missed reminder handling
+- A locally configured daily notification time on each device
+- Date-picker Snooze and missed reminder handling
 - Offline mode with a local cache and automatic sync
 - Email and password sign-in, with account deletion from settings
 - English and Ukrainian UI

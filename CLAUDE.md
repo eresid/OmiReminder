@@ -21,7 +21,7 @@ This file is the single source of truth for project instructions for all agents 
 - Use Vitest for tests. Backend integration tests use Supertest and `mongodb-memory-server`.
 - Add or update tests together with the code they cover. Recurrence, time zone, and sync logic must have unit tests for edge cases, including daylight saving transitions (skipped and repeated hours).
 - All user-facing strings go through localization and must have English and Ukrainian translations.
-- Store dates in UTC and keep the reminder's IANA time zone separately.
+- Store reminder due dates as date-only `YYYY-MM-DD` values. The backend must not store a reminder time or convert the date to a UTC instant. Each client stores its daily notification time locally and schedules alerts in its current local time zone. Store audit timestamps in UTC.
 - Never commit secrets. Add new environment variables to the project's `.env.example`.
 - Use `APP_ENV` (`local`, `stage`, `production`) for environment-specific behavior, not `NODE_ENV`. Swagger UI must stay disabled in production.
 - Never send reminder content, email addresses, passwords, or tokens to Sentry or Google Analytics.
