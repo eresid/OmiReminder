@@ -16,6 +16,8 @@ It has two clients and one remote backend:
 | Browser extension | `extension/` | Chrome extension (Manifest V3). |
 | Backend API | `backend/` | Express.js REST API deployed on a remote server, with MongoDB storage. |
 
+Mobile apps for iOS and Android are planned for version 1.0 (see [CHANGELOG.md](CHANGELOG.md)). Their stack is not chosen yet (see 12). The API and sync must not assume that the desktop app and the extension are the only clients.
+
 Both clients work offline with a local cache and sync with the backend when a connection is available.
 
 ## 2. Users and authentication
@@ -82,6 +84,7 @@ The registration form has two separate checkboxes. Both are unchecked by default
 - **FR-REC-5.** Recurrence produces calendar dates only. Each client uses its own daily notification time in the current system time zone to schedule alerts for those dates. Two clients may notify at different times for the same reminder.
 - **FR-REC-6.** Completing an occurrence of a recurring reminder moves it to the next occurrence after today. The user can also stop the recurrence.
 - **FR-REC-7.** A recurring reminder is shown only once, for its current occurrence. A missed occurrence is overdue only until the next occurrence date arrives; on that date the reminder moves forward to the new occurrence and is no longer overdue. For example, a weekly Monday reminder missed on Monday is overdue from Tuesday to Sunday, and on the next Monday it shows under "Today". A daily reminder is therefore never overdue: a missed day simply shows it under "Today" again.
+- **FR-REC-8 (planned).** In addition to calendar recurrence, `Repeat` offers "after completion": every N days, weeks, or months counted from the local date on which the previous occurrence was completed. For example, "water the plants 3 days after completion" completed on Thursday is next due on Sunday. Such a reminder has no next occurrence until it is completed, so a missed one stays overdue until it is completed or rescheduled; FR-REC-7 does not apply to it.
 
 ### 3.3 Operations
 
@@ -94,6 +97,7 @@ The registration form has two separate checkboxes. Both are unchecked by default
 - **FR-REM-5b.** Clicking the priority button lets the user choose `low`, `normal`, or `high`. Description and tags are available only after creation, on the full reminder editing screen; that screen also allows changing title, date, recurrence, and priority.
 - **FR-REM-6.** Reschedule a reminder to another date: "Tomorrow" as a quick option, or any future date from a date picker. It never asks for a duration in minutes or hours.
 - **FR-REM-6a.** For a one-time reminder, rescheduling changes its `dueDate`. For a recurring reminder, it defers only the current occurrence to the chosen date; the recurrence anchor and future occurrences remain unchanged. Occurrence-specific deferrals are synced as date-only data.
+- **FR-REM-7 (planned, with AI integration).** The quick-add title understands dates and recurrence written in natural language, in English and Ukrainian, for example "pay for the internet tomorrow" or "полити квіти щопонеділка". The recognized part is highlighted, removed from the title, and applied to the date button. The user can undo the recognition with one click.
 
 ### 3.4 Main screen
 
@@ -111,6 +115,11 @@ The registration form has two separate checkboxes. Both are unchecked by default
 - **FR-MAIN-5.** Within each group, items are sorted by priority (high first), then by date (oldest first, which matters only for overdue items), then by creation time.
 - **FR-MAIN-6.** "Today" is the current local date of the device. The groups are recalculated at local midnight, when the app resumes, and when the device time zone changes.
 - **FR-MAIN-7.** Completed items disappear from the main screen, with a short "Undo" option.
+- **FR-MAIN-8.** The overdue group header has a "Reschedule all" action that moves every overdue reminder at once to today, tomorrow, or a date chosen in a date picker. Each reminder is rescheduled as in FR-REM-6a. The action can be undone with a short "Undo" option.
+
+### 3.5 Progress
+
+- **FR-STAT-1 (planned).** The app shows a streak: the number of consecutive days on which every reminder due that day was completed. Days without any reminders do not break the streak. Streaks can be turned off in settings. Detailed rules are defined when work on this feature starts.
 
 ## 4. Notifications
 
@@ -162,6 +171,8 @@ Local storage:
 | First day of the week | from OS locale | desktop, extension | account |
 | Time format (12 or 24 hours) | from OS locale | desktop, extension | account |
 | Daily notification time | 09:00 | desktop, extension | device |
+| Quick-add shortcut | `Ctrl+Alt+N` (`Cmd+Option+N` on macOS), can be turned off | desktop | device |
+| Streaks (FR-STAT-1) | on | all clients | account |
 | Usage statistics | as chosen at registration | desktop, extension | account |
 
 - **FR-SET-1.** Device settings (language, notification channels, app behavior, and daily notification time) are stored only on the device.
@@ -184,6 +195,7 @@ Local storage:
 - **FR-DESK-4.** Only one instance of the app runs at a time.
 - **FR-DESK-5.** Automatic updates (see 10.5).
 - **FR-DESK-6.** The tray icon shows a badge with the number of overdue reminders plus reminders due today. The badge is red when at least one reminder is overdue and neutral otherwise, shows "9+" above 9, and is hidden when the number is 0. The tray tooltip shows the counts separately, for example "2 overdue, 3 today". The badge updates together with the main screen groups (FR-MAIN-6). The icon is drawn by the app, so it does not depend on taskbar badge support, which is not available while the window is hidden to the tray.
+- **FR-DESK-7 (planned).** A global keyboard shortcut (see section 6) opens the compact quick-add form (FR-REM-5) in a small window from anywhere in the system, without opening the main window. The window closes after the reminder is created or on `Esc`. If the shortcut cannot be registered because another app uses it, settings show this and let the user choose another one.
 
 ## 9. Chrome extension
 
@@ -191,6 +203,7 @@ Local storage:
 - **FR-EXT-2.** The popup opens on the main screen (section 3.4) and lets the user view, create, and edit reminders.
 - **FR-EXT-3.** Shows the daily summary as a browser notification, including when the popup is closed.
 - **FR-EXT-4.** The toolbar icon shows the same badge as the desktop tray icon (FR-DESK-6), using the extension action badge.
+- **FR-EXT-5 (planned).** "Remind me about this page": one action creates a reminder from the current tab, with the page title as the editable title and the page URL in the description. It uses the `activeTab` permission, not access to all sites. URLs in descriptions are clickable in all clients.
 
 ## 10. Technical requirements
 
@@ -302,3 +315,5 @@ Analytics has two levels.
 
 - MongoDB deployment option: DigitalOcean Managed MongoDB, MongoDB Atlas, or self-hosted on DigitalOcean.
 - Time-zone policy for future backend-delivered email and Telegram notifications when an account is used in multiple time zones.
+- Mobile app stack for iOS and Android (for example React Native, which reuses React and TypeScript experience, or native apps).
+- AI integration for natural-language input (FR-REM-7): which provider to use, and whether reminder text may be sent to it. Sending reminder content to a third party needs a Privacy Policy update and possibly separate consent.

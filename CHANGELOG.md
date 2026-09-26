@@ -23,6 +23,7 @@ Recurring reminders and full notification handling in the Windows desktop app.
 - [ ] Pop-up window channel for the daily summary (FR-NOT-2).
 - [ ] Settings: turn each notification channel on or off. Defaults: OS notification on, sound on, pop-up window off (FR-NOT-2).
 - [ ] "All reminders" screen: filters by tag, priority, and status, and search (FR-REM-2, FR-REM-3).
+- [ ] Global quick-add shortcut: opens the compact quick-add form in a small window from anywhere in the system. Configurable in settings, can be turned off, and reports when the shortcut is taken by another app (FR-DESK-7).
 - [ ] English and Ukrainian translations for all new strings.
 
 ## [0.2.0] — Planned
@@ -60,6 +61,7 @@ Backend with authentication and reminders, and sync between the desktop app's lo
 - [ ] Sync on start, after sign-in, periodically while online, and when the connection returns (FR-SYNC-3, FR-SYNC-4).
 - [ ] Unit tests for the sync logic, including conflicts and soft deletes.
 - [ ] Settings: first day of the week and time format, synced with the account (section 6).
+- [ ] "Reschedule all" for the overdue group: today, tomorrow, or a chosen date, with Undo (FR-MAIN-8).
 - [ ] English and Ukrainian translations for all new strings.
 
 ## [0.1.0] — Planned
@@ -98,9 +100,9 @@ A local Windows desktop app: one-time date-based reminders, a main screen with o
 Each later version gets a detailed checklist when work on it starts.
 
 - **0.4.0 — Privacy and monitoring.** Sentry in the backend and desktop app, server-side metrics, Google Analytics with consent, consent management in settings, Privacy Policy, and account deletion (sections 2.1, 2.2, 10.9 to 10.11).
-- **0.5.0 — First public Windows release.** Stage and production deployment on DigitalOcean, NSIS installer with code signing, and automatic updates through GitHub Releases (section 10.5).
+- **0.5.0 — First public Windows release.** Stage and production deployment on DigitalOcean, NSIS installer with code signing, and automatic updates through GitHub Releases (section 10.5). "Repeat after completion": every N days, weeks, or months from the completion date, in the model, API, sync, and desktop app (FR-REC-8).
 - **0.6.0 — macOS and Linux.** Signed and notarized DMG, AppImage and deb packages, platform-specific tray and startup behavior, and release builds for all three platforms in CI.
 - **0.7.0 — Chrome extension: core.** Extension setup, sign-in, registration, compact quick-add and full editing of date-only reminders, the main screen in the popup, a locally stored daily notification time, IndexedDB cache, and sync.
-- **0.8.0 — Chrome extension: notifications and release.** Daily summary as a browser notification with `chrome.alarms`, including on a late start, toolbar icon badge (FR-EXT-4), Sentry and Google Analytics in the extension, and Chrome Web Store publication.
-- **1.0.0 — Stable release.** Stabilization and bug fixes across all clients.
+- **0.8.0 — Chrome extension: notifications and release.** Daily summary as a browser notification with `chrome.alarms`, including on a late start, toolbar icon badge (FR-EXT-4), "Remind me about this page" (FR-EXT-5), Sentry and Google Analytics in the extension, and Chrome Web Store publication.
+- **1.0.0 — Stable release.** Mobile apps for iOS and Android. AI integration, starting with natural-language dates and recurrence in quick-add, in English and Ukrainian (FR-REM-7). Streaks (FR-STAT-1). Stabilization and bug fixes across all clients.
 - **After 1.0.0.** Email verification and password reset (FR-AUTH-5, FR-AUTH-6), email and Telegram notifications (FR-NOT-6, FR-NOT-7).
