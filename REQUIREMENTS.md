@@ -6,7 +6,9 @@ Status: draft, initial planning stage.
 
 ## 1. Overview
 
-OmiReminder is a cross-platform reminder app. It has two clients and one remote backend:
+OmiReminder is a cross-platform app for date-based reminders and daily checklists. Each reminder belongs to a day, not to a time of day. The main screen shows what is overdue, what is due today, and what comes next, and the app sends at most one summary notification per day. Events at a specific time (for example "call at 14:30") are out of scope: users keep them in their calendar, such as Google Calendar.
+
+It has two clients and one remote backend:
 
 | Component | Directory | Description |
 |---|---|---|
@@ -78,20 +80,41 @@ The registration form has two separate checkboxes. Both are unchecked by default
 - **FR-REC-3.** Monthly recurrence repeats on the same day of the month. If the month has no such day (for example the 31st), the reminder fires on the last day of that month.
 - **FR-REC-4.** Yearly recurrence repeats on the same date. A reminder set for 29 February fires on 28 February in non-leap years.
 - **FR-REC-5.** Recurrence produces calendar dates only. Each client uses its own daily notification time in the current system time zone to schedule alerts for those dates. Two clients may notify at different times for the same reminder.
-- **FR-REC-6.** Completing an occurrence of a recurring reminder moves it to the next occurrence. The user can also stop the recurrence.
+- **FR-REC-6.** Completing an occurrence of a recurring reminder moves it to the next occurrence after today. The user can also stop the recurrence.
+- **FR-REC-7.** A recurring reminder is shown only once, for its current occurrence. A missed occurrence is overdue only until the next occurrence date arrives; on that date the reminder moves forward to the new occurrence and is no longer overdue. For example, a weekly Monday reminder missed on Monday is overdue from Tuesday to Sunday, and on the next Monday it shows under "Today". A daily reminder is therefore never overdue: a missed day simply shows it under "Today" again.
 
 ### 3.3 Operations
 
 - **FR-REM-1.** Create, view, edit, and delete reminders in both the desktop app and the extension.
-- **FR-REM-2.** List reminders with sorting by date and priority, and filtering by tag, priority, and status.
+- **FR-REM-2.** A separate "All reminders" screen lists reminders with sorting by date and priority, and filtering by tag, priority, and status.
 - **FR-REM-3.** Search reminders by title and description.
 - **FR-REM-4.** Mark a reminder as completed.
 - **FR-REM-5.** The reminder form asks for a date only. It has no time-of-day or time-zone selector.
+- **FR-REM-6.** Reschedule a reminder to another date: "Tomorrow" as a quick option, or any future date from a date picker. It never asks for a duration in minutes or hours.
+- **FR-REM-6a.** For a one-time reminder, rescheduling changes its `dueDate`. For a recurring reminder, it defers only the current occurrence to the chosen date; the recurrence anchor and future occurrences remain unchanged. Occurrence-specific deferrals are synced as date-only data.
+
+### 3.4 Main screen
+
+- **FR-MAIN-1.** The main screen shows active reminders in up to three groups, in this order:
+
+  | Group | Contents | Shown when |
+  |---|---|---|
+  | Overdue | Reminders whose date is before today | there is at least one |
+  | Today | Reminders due today | always, with an empty state if there are none |
+  | Next day | Reminders on the nearest date after today that has any, for example Monday when today is Friday and the weekend is empty | there is at least one later reminder |
+
+- **FR-MAIN-2.** The overdue group is always at the top and is highlighted in red, so the user either completes or reschedules each item. Color is not the only signal: the group has an "Overdue" heading and each item shows its original date. The red must keep sufficient contrast in light and dark themes.
+- **FR-MAIN-3.** Each item on the main screen offers quick actions: complete (FR-REM-4) and reschedule (FR-REM-6).
+- **FR-MAIN-4.** The next day group is titled "Tomorrow" when it is tomorrow, and otherwise with the weekday and date, for example "Monday, 29 September". Only that one date is shown; later reminders are on the "All reminders" screen.
+- **FR-MAIN-5.** Within each group, items are sorted by priority (high first), then by date (oldest first, which matters only for overdue items), then by creation time.
+- **FR-MAIN-6.** "Today" is the current local date of the device. The groups are recalculated at local midnight, when the app resumes, and when the device time zone changes.
+- **FR-MAIN-7.** Completed items disappear from the main screen, with a short "Undo" option.
 
 ## 4. Notifications
 
-- **FR-NOT-1.** On a reminder's due date, each client notifies the user at its configured daily notification time in the device's current local time zone. The backend stores only the date and does not schedule client notifications.
-- **FR-NOT-1b.** Each client recalculates upcoming notifications when it starts, resumes, or detects a time-zone or daily notification time change. A due-date alert configured for 09:00 must fire at 09:00 local time after the user moves from France to the United States.
+- **FR-NOT-1.** Each client shows at most one notification per day: a summary at its configured daily notification time in the device's current local time zone. It is shown only if there are overdue reminders or reminders due today. It states the counts (for example "3 for today, 2 overdue") and the titles of the first few reminders in main screen order. Clicking it opens the main screen. The backend stores only dates and does not schedule client notifications.
+- **FR-NOT-1a.** Reminders that are created for today, or become due today, after the summary was shown do not trigger another notification. They appear on the main screen.
+- **FR-NOT-1b.** Each client recalculates the next summary time when it starts, resumes, or detects a time-zone or daily notification time change. A summary configured for 09:00 must fire at 09:00 local time after the user moves from France to the United States.
 - **FR-NOT-1c.** If the configured local notification time does not exist on a due date because clocks move forward, notify at the nearest valid local time after the gap. If that local time occurs twice because clocks move back, notify only at the first occurrence.
 - **FR-NOT-2.** Channels in the desktop app:
 
@@ -103,10 +126,9 @@ The registration form has two separate checkboxes. Both are unchecked by default
 
   Each channel can be turned on or off in settings.
 - **FR-NOT-3.** The extension shows notifications through `chrome.notifications` and schedules them with `chrome.alarms`.
-- **FR-NOT-4.** From a notification the user can open the reminder, mark it as completed, or choose Snooze. Snooze opens a date-picker popup so the user can choose a future date. It never asks for a duration in minutes or hours. The selected date is saved and synced; the reminder notifies again on that date at the client's local daily notification time.
-- **FR-NOT-4a.** For a one-time reminder, Snooze changes its `dueDate`. For a recurring reminder, Snooze defers only the selected occurrence to the chosen date; the recurrence anchor and future occurrences remain unchanged. Occurrence-specific deferrals are synced as date-only data.
-- **FR-NOT-5.** Reminders that became due while the client was not running are shown as missed when the client starts. If several occurrences of the same recurring reminder were missed, show only the latest missed notification for that reminder.
-- **FR-NOT-5a.** Every running client of the account shows its own notification for a due reminder, even if another client already did. This ensures no reminder is missed. Deduplication between clients may be added later.
+- **FR-NOT-4.** The notification has no action buttons. Clicking it opens the app on the main screen, where the user completes or reschedules reminders (FR-MAIN-3).
+- **FR-NOT-5.** If the client was not running at the daily notification time, it shows the summary once when it starts later that day. It is not shown again for the same day. Reminders from previous days are not notified separately; they are part of the overdue count.
+- **FR-NOT-5a.** Every running client of the account shows its own daily summary, even if another client already did. Deduplication between clients may be added later.
 - **FR-NOT-6 (future).** Email notifications.
 - **FR-NOT-7 (future).** Telegram notifications.
 
@@ -114,7 +136,7 @@ Future channels are sent by the backend. Their scheduling policy needs a time zo
 
 ## 5. Offline mode and sync
 
-- **FR-SYNC-1.** Registration and the first sign-in require an internet connection. After a successful sign-in, each client keeps a local cache of the user's reminders and works fully offline: view, create, edit, delete, complete, snooze.
+- **FR-SYNC-1.** Registration and the first sign-in require an internet connection. After a successful sign-in, each client keeps a local cache of the user's reminders and works fully offline: view, create, edit, delete, complete, reschedule.
 - **FR-SYNC-2.** Local changes that are not yet on the server are marked as **unsynced**, and the UI shows this status.
 - **FR-SYNC-3.** When the connection returns, the client sends its unsynced changes and fetches changes from the server.
 - **FR-SYNC-4.** The client also syncs on start, after sign-in, and periodically while online, so it does not request the server on every screen.
@@ -141,7 +163,7 @@ Local storage:
 | Usage statistics | as chosen at registration | desktop, extension | account |
 
 - **FR-SET-1.** Device settings (language, notification channels, app behavior, and daily notification time) are stored only on the device.
-- **FR-SET-1a.** The user can choose one daily notification time separately on each client. It applies to all reminders on their due dates. This clock time stays local and is never sent to the backend or synced to other devices.
+- **FR-SET-1a.** The user can choose one daily notification time separately on each client. It is the time of the daily summary (FR-NOT-1). This clock time stays local and is never sent to the backend or synced to other devices.
 - **FR-SET-2.** Account settings (date and time preferences) are stored on the server and synced to all clients of the account, like reminders.
 - **FR-SET-3.** Until account settings are set, their defaults come from the OS locale.
 
@@ -159,12 +181,14 @@ Local storage:
 - **FR-DESK-3.** Launch at system startup, controlled by a setting that is on by default.
 - **FR-DESK-4.** Only one instance of the app runs at a time.
 - **FR-DESK-5.** Automatic updates (see 10.5).
+- **FR-DESK-6.** The tray icon shows a badge with the number of overdue reminders plus reminders due today. The badge is red when at least one reminder is overdue and neutral otherwise, shows "9+" above 9, and is hidden when the number is 0. The tray tooltip shows the counts separately, for example "2 overdue, 3 today". The badge updates together with the main screen groups (FR-MAIN-6). The icon is drawn by the app, so it does not depend on taskbar badge support, which is not available while the window is hidden to the tray.
 
 ## 9. Chrome extension
 
 - **FR-EXT-1.** Manifest V3, Chrome only for now.
-- **FR-EXT-2.** The popup lets the user view, create, and edit reminders.
-- **FR-EXT-3.** Shows browser notifications for due reminders, including when the popup is closed.
+- **FR-EXT-2.** The popup opens on the main screen (section 3.4) and lets the user view, create, and edit reminders.
+- **FR-EXT-3.** Shows the daily summary as a browser notification, including when the popup is closed.
+- **FR-EXT-4.** The toolbar icon shows the same badge as the desktop tray icon (FR-DESK-6), using the extension action badge.
 
 ## 10. Technical requirements
 
@@ -196,7 +220,7 @@ Local storage:
 - Test runner: **Vitest** in all three projects. It works with Vite and TypeScript without extra configuration and has a Jest-compatible API. It also runs backend tests.
 - Backend integration tests use Supertest against the Express app and an in-memory MongoDB (`mongodb-memory-server`).
 - Integration tests are written together with the features, starting from the first endpoint.
-- Recurrence date calculations, date-only sync, local notification scheduling, time-zone changes, and Snooze date changes must have unit tests. Daylight saving transitions (FR-NOT-1c) must be tested for both a skipped hour and a repeated hour, in time zones of both hemispheres.
+- Recurrence date calculations (including FR-REC-7), main screen grouping and sorting (including midnight rollover and the "next day" group skipping empty days), date-only sync, daily summary scheduling (once per day, and on a late start), time-zone changes, and rescheduling must have unit tests. Daylight saving transitions (FR-NOT-1c) must be tested for both a skipped hour and a repeated hour, in time zones of both hemispheres.
 - Account deletion must have integration tests that check no user data remains on the server.
 
 ### 10.5 Build, packaging, and updates
@@ -269,7 +293,7 @@ Analytics has two levels.
 - Email and Telegram notifications (planned, see 4).
 - Email verification and password reset (planned for version 2, see 2).
 - Deduplication of notifications between clients (see FR-NOT-5a).
-- Per-reminder time-of-day and advance notifications.
+- Per-reminder time of day, advance notifications, and a separate notification for each reminder. Timed events belong in the user's calendar.
 - Sharing reminders between users.
 
 ## 12. Open questions

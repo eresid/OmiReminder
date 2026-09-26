@@ -7,7 +7,7 @@ Recurring reminders and full notification handling in the Windows desktop app.
 ### Backend
 
 - [ ] Recurrence fields in the reminder model and API: once, daily, weekly, monthly, yearly (FR-REC-1).
-- [ ] Date-only occurrence deferrals in the reminder model and API for Snooze of recurring reminders (FR-NOT-4a).
+- [ ] Date-only occurrence deferrals in the reminder model and API for rescheduling recurring reminders (FR-REM-6a).
 - [ ] Filtering by tag, priority, and status, and search by title and description (FR-REM-2, FR-REM-3).
 - [ ] Integration tests for the new fields, filters, and search.
 
@@ -16,15 +16,13 @@ Recurring reminders and full notification handling in the Windows desktop app.
 - [ ] Shared recurrence engine: next occurrence date calculation from the date-only reminder value (FR-REC-2 to FR-REC-5).
 - [ ] Edge cases: the 31st in shorter months and 29 February (FR-REC-3, FR-REC-4).
 - [ ] Unit tests for recurrence dates and local notification scheduling across skipped and repeated hours in time zones of both hemispheres (FR-NOT-1c).
-- [ ] Completing an occurrence moves the reminder to the next occurrence. The user can stop the recurrence (FR-REC-6).
+- [ ] Completing an occurrence moves the reminder to the next occurrence after today. The user can stop the recurrence (FR-REC-6).
+- [ ] A missed recurring reminder is shown once and stays overdue only until its next occurrence date, so daily reminders are never overdue (FR-REC-7).
 - [ ] Recurrence controls in the date-only reminder form.
-- [ ] Snooze from the notification opens a date picker and saves the selected future date (FR-NOT-4).
-- [ ] Snoozing a recurring reminder defers only the selected occurrence, preserving the recurrence schedule (FR-NOT-4a).
-- [ ] Mark as completed and open the reminder from the notification (FR-NOT-4).
-- [ ] Missed reminders on start, showing only the latest missed occurrence of a recurring reminder (FR-NOT-5).
-- [ ] Pop-up window notification channel (FR-NOT-2).
+- [ ] Rescheduling a recurring reminder defers only the current occurrence, preserving the recurrence schedule (FR-REM-6a).
+- [ ] Pop-up window channel for the daily summary (FR-NOT-2).
 - [ ] Settings: turn each notification channel on or off. Defaults: OS notification on, sound on, pop-up window off (FR-NOT-2).
-- [ ] Reminder list: filters by tag, priority, and status, and search.
+- [ ] "All reminders" screen: filters by tag, priority, and status, and search (FR-REM-2, FR-REM-3).
 - [ ] English and Ukrainian translations for all new strings.
 
 ## [0.2.0] — Planned
@@ -66,7 +64,7 @@ Backend with authentication and reminders, and sync between the desktop app's lo
 
 ## [0.1.0] — Planned
 
-A local Windows desktop app: one-time reminders with notifications, stored in a local SQLite database. No backend, no account, and no sync in this version.
+A local Windows desktop app: one-time date-based reminders, a main screen with overdue, today, and next day groups, and one daily summary notification, stored in a local SQLite database. No backend, no account, and no sync in this version.
 
 ### Repository
 
@@ -79,16 +77,20 @@ A local Windows desktop app: one-time reminders with notifications, stored in a 
 - [ ] Localization with English and Ukrainian. Language from the OS, English as fallback, changeable in settings (section 7).
 - [ ] Local SQLite database in the Electron main process, with schema migrations (section 5).
 - [ ] Reminder storage with the fields from section 3.1 that do not depend on the server: client-generated UUID `id`, title, description, date-only `dueDate`, priority, tags, status, UTC `createdAt` and `updatedAt`.
-- [ ] Reminder list sorted by date and priority.
+- [ ] Main screen: overdue (red, at the top), today, and the next day that has reminders, sorted by priority within each group (FR-MAIN-1 to FR-MAIN-6).
+- [ ] "All reminders" screen sorted by date and priority (FR-REM-2).
 - [ ] Create, view, edit, and delete one-time reminders (FR-REM-1).
-- [ ] Mark a reminder as completed.
-- [ ] OS notification and sound on the due date at the device's locally configured daily notification time (FR-NOT-1, FR-NOT-2).
+- [ ] Mark a reminder as completed from the main screen, with Undo (FR-REM-4, FR-MAIN-7).
+- [ ] Reschedule a reminder: "Tomorrow" or a date picker (FR-REM-6).
+- [ ] One daily summary notification with OS notification and sound at the locally configured daily notification time, only when there are overdue or today reminders. Clicking it opens the main screen (FR-NOT-1, FR-NOT-2, FR-NOT-4).
+- [ ] Show the daily summary on a late start if it was missed that day, and never more than once per day (FR-NOT-1a, FR-NOT-5).
 - [ ] System tray with "Open", "New reminder", and "Quit". Closing the window hides it to the tray (FR-DESK-2).
+- [ ] Tray icon badge with the number of overdue and today reminders, red when anything is overdue, and a tooltip with both counts (FR-DESK-6).
 - [ ] Only one running instance (FR-DESK-4).
 - [ ] Launch at system startup, on by default, with a setting to turn it off (FR-DESK-3).
 - [ ] Settings screen: language, launch at startup, and a locally stored daily notification time (FR-SET-1a).
-- [ ] Unit tests for the local database layer and notification scheduling.
-- [ ] Recalculate notification times after the device time zone changes or the app resumes (FR-NOT-1b).
+- [ ] Recalculate the main screen groups and the next summary time at local midnight, on resume, and after the device time zone changes (FR-MAIN-6, FR-NOT-1b).
+- [ ] Unit tests for the local database layer, main screen grouping and sorting, and daily summary scheduling.
 
 ## Later versions
 
@@ -97,7 +99,7 @@ Each later version gets a detailed checklist when work on it starts.
 - **0.4.0 — Privacy and monitoring.** Sentry in the backend and desktop app, server-side metrics, Google Analytics with consent, consent management in settings, Privacy Policy, and account deletion (sections 2.1, 2.2, 10.9 to 10.11).
 - **0.5.0 — First public Windows release.** Stage and production deployment on DigitalOcean, NSIS installer with code signing, and automatic updates through GitHub Releases (section 10.5).
 - **0.6.0 — macOS and Linux.** Signed and notarized DMG, AppImage and deb packages, platform-specific tray and startup behavior, and release builds for all three platforms in CI.
-- **0.7.0 — Chrome extension: core.** Extension setup, sign-in, registration, viewing, creating, and editing date-only reminders, a locally stored daily notification time, IndexedDB cache, and sync.
-- **0.8.0 — Chrome extension: notifications and release.** Browser notifications with `chrome.alarms`, date-picker Snooze, missed reminders, Sentry and Google Analytics in the extension, and Chrome Web Store publication.
+- **0.7.0 — Chrome extension: core.** Extension setup, sign-in, registration, viewing, creating, and editing date-only reminders, the main screen in the popup, a locally stored daily notification time, IndexedDB cache, and sync.
+- **0.8.0 — Chrome extension: notifications and release.** Daily summary as a browser notification with `chrome.alarms`, including on a late start, toolbar icon badge (FR-EXT-4), Sentry and Google Analytics in the extension, and Chrome Web Store publication.
 - **1.0.0 — Stable release.** Stabilization and bug fixes across all clients.
 - **After 1.0.0.** Email verification and password reset (FR-AUTH-5, FR-AUTH-6), email and Telegram notifications (FR-NOT-6, FR-NOT-7).

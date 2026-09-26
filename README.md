@@ -1,15 +1,15 @@
 # OmiReminder
 
-OmiReminder is a cross-platform reminder app. The desktop app lives in the system tray and notifies you about upcoming events and tasks. A Chrome extension gives access to the same reminders in the browser. Both clients work offline and sync through a shared remote backend.
+OmiReminder is a cross-platform app for date-based reminders and daily checklists. The desktop app lives in the system tray, shows what is overdue, due today, and coming next, and sends one daily summary notification. Events at a specific time belong in your calendar. A Chrome extension gives access to the same reminders in the browser. Both clients work offline and sync through a shared remote backend.
 
 See [REQUIREMENTS.md](REQUIREMENTS.md) for the full requirements.
 
 ## Features
 
 - Date-only reminders with title, description, priority, tags, and recurrence (daily, weekly, monthly, yearly)
-- Notifications through OS notifications, sound, and a pop-up window, each configurable
-- A locally configured daily notification time on each device
-- Date-picker Snooze and missed reminder handling
+- Main screen with overdue reminders highlighted at the top, today's reminders by priority, and the next day that has reminders
+- One daily summary notification at a locally configured time, through OS notifications, sound, and a pop-up window, each configurable
+- Quick complete and reschedule to another date
 - Offline mode with a local cache and automatic sync
 - Email and password sign-in, with account deletion from settings
 - English and Ukrainian UI
