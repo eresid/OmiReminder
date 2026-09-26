@@ -53,7 +53,7 @@ The registration form has two separate checkboxes. Both are unchecked by default
 ### 2.2 Account deletion
 
 - **FR-DEL-1.** The user can delete their account from settings in the desktop app and in the extension. Deletion requires an internet connection and confirmation with the account password.
-- **FR-DEL-2.** Deleting the account permanently removes the user and all their reminders, settings, and consent records from the server, and revokes all tokens.
+- **FR-DEL-2.** Deleting the account permanently removes the user and all their reminders, tags, settings, and consent records from the server, and revokes all tokens.
 - **FR-DEL-3.** The client that deleted the account clears its local cache. Other clients clear their local cache on the next sync, when the server reports that the account no longer exists.
 - **FR-DEL-4.** The Privacy Policy contains step-by-step instructions for deleting the account.
 
@@ -66,9 +66,9 @@ The registration form has two separate checkboxes. Both are unchecked by default
 | `id` | yes | UUID generated on the client, so records can be created offline. |
 | `title` | yes | Short text. |
 | `description` | no | Longer text. |
-| `dueDate` | yes | Calendar date of the (first) occurrence, stored as a date-only `YYYY-MM-DD` value, for example `2026-10-01`. No time or time zone is stored with a reminder. Do not interpret it as midnight UTC. |
+| `dueDate` | no | Calendar date of the (first) occurrence, stored as a date-only `YYYY-MM-DD` value, for example `2026-10-01`. No time or time zone is stored with a reminder. Do not interpret it as midnight UTC. Empty means the reminder has no date (see 3.7). A recurring reminder always has a date. |
 | `priority` | yes | `low`, `normal`, or `high`. Default: `normal`. |
-| `tags` | no | List of strings. |
+| `tagIds` | no | IDs of the reminder's tags (see 3.6), at most 20. Empty means the reminder has no tags. |
 | `recurrence` | no | See 3.2. Empty means a one-time reminder. |
 | `status` | yes | `active`, `completed`, or `archived`. |
 | `completedAt` | no | UTC timestamp of completion, set while the reminder is completed. |
@@ -90,13 +90,13 @@ The registration form has two separate checkboxes. Both are unchecked by default
 ### 3.3 Operations
 
 - **FR-REM-1.** Create, view, edit, and delete reminders in both the desktop app and the extension.
-- **FR-REM-2.** A separate "All reminders" screen lists reminders with sorting by date and priority, and filtering by tag, priority, and status.
+- **FR-REM-2.** A separate "All reminders" screen lists reminders that have a date, with sorting by date and priority, and filtering by tag (FR-TAG-10), priority, and status. Reminders without a date are not on this screen (FR-NODATE-1).
 - **FR-REM-3.** Search reminders by title and description.
 - **FR-REM-4.** Mark a reminder as completed.
-- **FR-REM-5.** Creating a reminder uses a compact quick-add form: one required `Title` input, with `Today` (the default due date) and `Normal` (the default priority) shown as small clickable buttons in one row beneath it, followed by the create action. The initial form has no separate date, priority, repeat, description, or tags fields. Inside the app, `Ctrl+N` (`Cmd+N` on macOS) or `Q` opens it.
-- **FR-REM-5a.** Clicking the date button opens a date-picker popup. The user can choose another date and configure `Repeat` in that popup. The chosen date or recurrence is reflected on the button when the popup closes. There is no time-of-day or time-zone control.
+- **FR-REM-5.** Creating a reminder uses a compact quick-add form: one required `Title` input, with `Today` (the default due date) and `Normal` (the default priority) shown as small clickable buttons in one row beneath it, followed by the create action. The initial form has no separate date, priority, repeat, description, or tags fields. Opened on a tag page or in Inbox, the form uses different defaults (FR-TAG-5). Inside the app, `Ctrl+N` (`Cmd+N` on macOS) or `Q` opens it.
+- **FR-REM-5a.** Clicking the date button opens a date-picker popup. The user can choose another date, choose "No date" (FR-NODATE-2), and configure `Repeat` in that popup. The chosen date or recurrence is reflected on the button when the popup closes. There is no time-of-day or time-zone control.
 - **FR-REM-5b.** Clicking the priority button lets the user choose `low`, `normal`, or `high`. Description and tags are available only after creation, on the full reminder editing screen; that screen also allows changing title, date, recurrence, and priority.
-- **FR-REM-6.** Reschedule a reminder to another date: "Tomorrow" as a quick option, or any future date from a date picker. It never asks for a duration in minutes or hours.
+- **FR-REM-6.** Reschedule a reminder to another date: "Tomorrow" as a quick option, or any future date from a date picker. It never asks for a duration in minutes or hours. For a reminder without a date, the same action sets its date (FR-NODATE-4).
 - **FR-REM-6a.** For a one-time reminder, rescheduling changes its `dueDate`. For a recurring reminder, it defers only the current occurrence to the chosen date; the recurrence anchor and future occurrences remain unchanged. Occurrence-specific deferrals are synced as date-only data.
 - **FR-REM-7 (planned, with AI integration).** The quick-add title understands dates and recurrence written in natural language, in English and Ukrainian, for example "pay for the internet tomorrow" or "полити квіти щопонеділка". The recognized part is highlighted, removed from the title, and applied to the date button. The user can undo the recognition with one click.
 
@@ -116,15 +116,51 @@ The registration form has two separate checkboxes. Both are unchecked by default
 - **FR-MAIN-5.** Within each group, active items are sorted by priority (high first), then by date (oldest first, which matters only for overdue items), then by creation time. Completed items follow them (FR-MAIN-7).
 - **FR-MAIN-6.** "Today" is the current local date of the device. The groups are recalculated at local midnight, when the app resumes, and when the device time zone changes.
 - **FR-MAIN-7.** A reminder completed for today or for the shown next day stays in its group, struck through, below the active items and in the order of completion. A short "Undo" option appears after completing, and clicking the struck item marks it as not completed again. Completed overdue items leave the main screen. Group counts, the tray badge, and the daily summary count only active reminders.
-- **FR-MAIN-8.** The overdue group header has a "Reschedule all" action that moves every overdue reminder at once to today, tomorrow, or a date chosen in a date picker. Each reminder is rescheduled as in FR-REM-6a. The action can be undone with a short "Undo" option.
+- **FR-MAIN-8.** The overdue group header has a "Reschedule all" action that moves every overdue reminder at once to today, tomorrow, or a date chosen in a date picker. Each reminder is rescheduled as in FR-REM-6a. The action can be undone with a short "Undo" option. While a tag filter is active, it moves only the visible overdue reminders (FR-TAG-12).
+- **FR-MAIN-9.** The main screen has a tag filter (FR-TAG-10). Reminders without a date are never on the main screen (FR-NODATE-1).
 
 ### 3.5 Progress
 
 - **FR-STAT-1 (planned).** The app shows a streak: the number of consecutive days on which every reminder due that day was completed. Days without any reminders do not break the streak. Streaks can be turned off in settings. Detailed rules are defined when work on this feature starts.
 
+### 3.6 Tags
+
+A tag groups reminders into a project, for example "Work", "Home", or "Shopify course". Tags are separate records, so a tag can exist before it has any reminders, and renaming it does not change its reminders.
+
+| Field | Required | Notes |
+|---|---|---|
+| `id` | yes | UUID generated on the client, so tags can be created offline. |
+| `name` | yes | Trimmed, 1 to 50 characters. Unique among the account's non-deleted tags, ignoring case. |
+| `color` | no | One color from a fixed palette. Empty means the neutral color. |
+| `archivedAt` | no | UTC timestamp, set while the tag is archived (FR-TAG-7). |
+| `createdAt`, `updatedAt` | yes | UTC timestamps. |
+| `deletedAt` | no | Soft-delete marker, needed for sync. |
+| `version` | yes | Increased by the server on every change. Used for sync. |
+
+- **FR-TAG-1.** A reminder can have several tags (at most 20) and then appears on the page of each of them.
+- **FR-TAG-2.** The sidebar has a "Tags" section below the main navigation. It starts with "Inbox" (FR-TAG-4), then lists the non-archived tags alphabetically in the current UI language, each with the number of its active reminders, with or without a date. A "+" action in the section header creates a tag: the user enters a name, and the app opens the new tag's page. A tag's color is shown as a dot next to its name; the name is always shown, so color is not the only signal.
+- **FR-TAG-3.** A tag page lists all reminders with that tag in these groups, in this order: "Overdue" (red, as in FR-MAIN-2), reminders with a date grouped by date in ascending order, "No date", and "Completed". Empty groups are hidden. Within each group, active items are sorted as in FR-MAIN-5. "Completed" is collapsed by default and shows the most recently completed first. Each active item has the quick actions from FR-MAIN-3.
+- **FR-TAG-4.** "Inbox" is a page with the same layout as a tag page for reminders that have no tags, with or without a date. It is not a tag: it cannot be renamed, colored, archived, or deleted.
+- **FR-TAG-5.** Quick-add opened on a tag page uses "No date" as the default date and adds that tag. The tag is shown as a removable chip in the button row. Quick-add opened in Inbox uses "No date" and no tag. Opened anywhere else, including from the tray and the global shortcut, it uses the defaults from FR-REM-5 and no tag.
+- **FR-TAG-6.** The tag page header has a menu to rename the tag, change its color, archive it, and delete it. Renaming to a name that another tag already has, ignoring case, is rejected with a message.
+- **FR-TAG-7.** Archiving hides a finished project without losing its history. An archived tag is not listed in the sidebar tags, in tag filters, or in tag suggestions (FR-TAG-9). Its reminders keep it, still show it on their rows, and stay on the other screens. Archived tags are listed under a collapsed "Archived" entry at the end of the sidebar tags section, where their pages can be opened and the tags unarchived.
+- **FR-TAG-8.** Deleting a tag asks for confirmation that states how many reminders have it. It removes the tag from those reminders and does not delete the reminders; reminders left without tags appear in Inbox. The tag is soft-deleted for sync (FR-SYNC-5).
+- **FR-TAG-9.** On the full editing screen (FR-REM-5b), the tags input suggests existing non-archived tags while the user types. A name that matches an existing tag, ignoring case, adds that tag. Any other name creates a new tag when the user confirms it.
+- **FR-TAG-10.** The main screen and the "All reminders" screen have a tag filter in their header. The user can select several non-archived tags and "No tag". The screen then shows reminders that have at least one selected tag, or no tags when "No tag" is selected. With nothing selected, the filter is off and all reminders are shown.
+- **FR-TAG-11.** The tag filter changes only the list on its screen. Sidebar counts, the tray badge, and the daily summary always count all reminders. While the filter hides reminders, the header shows how many are hidden, including how many of them are overdue, and has an action to clear the filter. When no reminder matches, the screen shows an empty state with the same action.
+- **FR-TAG-12.** Each screen keeps its own filter until the app quits. The filter is not saved between app starts, so a forgotten filter cannot hide reminders after a restart. Group actions, such as "Reschedule all" (FR-MAIN-8), apply only to the reminders that the filter shows, and state their number.
+
+### 3.7 Reminders without a date
+
+- **FR-NODATE-1.** A reminder can have no date, for example a task in a project that is not scheduled yet. It is shown only on the pages of its tags, or in Inbox when it has no tags (section 3.6). It is not shown on the main screen or the "All reminders" screen, and it is not counted in group counts, the tray badge, the daily summary, or streaks.
+- **FR-NODATE-2.** The date-picker popup of quick-add (FR-REM-5a) and of the full editing screen has a "No date" option. With it chosen, the date button reads "No date".
+- **FR-NODATE-3.** A reminder without a date cannot repeat. While `Repeat` is set to anything other than once, the "No date" option is unavailable.
+- **FR-NODATE-4.** For a reminder without a date, the reschedule quick action (FR-REM-6) is labeled "Set date" and offers "Today", "Tomorrow", and a date picker. After a date is set, the reminder also appears on the main screen and the "All reminders" screen by that date.
+- **FR-NODATE-5.** A reminder without a date can be completed and reopened like any other reminder. Once completed, it moves to the "Completed" group of its tag pages or Inbox.
+
 ## 4. Notifications
 
-- **FR-NOT-1.** Each client shows at most one notification per day: a summary at its configured daily notification time in the device's current local time zone. It is shown only if there are overdue reminders or reminders due today. It states the counts (for example "3 for today, 2 overdue") and the titles of the first few reminders in main screen order. Clicking it opens the main screen. The backend stores only dates and does not schedule client notifications.
+- **FR-NOT-1.** Each client shows at most one notification per day: a summary at its configured daily notification time in the device's current local time zone. It is shown only if there are overdue reminders or reminders due today; reminders without a date are never included. It states the counts (for example "3 for today, 2 overdue") and the titles of the first few reminders in main screen order. Clicking it opens the main screen. The backend stores only dates and does not schedule client notifications.
 - **FR-NOT-1a.** Reminders that are created for today, or become due today, after the summary was shown do not trigger another notification. They appear on the main screen.
 - **FR-NOT-1b.** Each client recalculates the next summary time when it starts, resumes, or detects a time-zone or daily notification time change. A summary configured for 09:00 must fire at 09:00 local time after the user moves from France to the United States.
 - **FR-NOT-1c.** If the configured local notification time does not exist on a due date because clocks move forward, notify at the nearest valid local time after the gap. If that local time occurs twice because clocks move back, notify only at the first occurrence.
@@ -148,13 +184,14 @@ Future channels are sent by the backend. Their scheduling policy needs a time zo
 
 ## 5. Offline mode and sync
 
-- **FR-SYNC-1.** Registration and the first sign-in require an internet connection. After a successful sign-in, each client keeps a local cache of the user's reminders and works fully offline: view, create, edit, delete, complete, reschedule.
+- **FR-SYNC-1.** Registration and the first sign-in require an internet connection. After a successful sign-in, each client keeps a local cache of the user's reminders and tags and works fully offline: view, create, edit, delete, complete, reschedule.
 - **FR-SYNC-2.** Local changes that are not yet on the server are marked as **unsynced**, and the UI shows this status.
 - **FR-SYNC-3.** When the connection returns, the client sends its unsynced changes and fetches changes from the server.
 - **FR-SYNC-4.** The client also syncs on start, after sign-in, and periodically while online, so it does not request the server on every screen.
-- **FR-SYNC-5.** Deletions are soft deletes (`deletedAt`) so they can be synced to other devices.
+- **FR-SYNC-5.** Deletions of reminders and tags are soft deletes (`deletedAt`) so they can be synced to other devices.
 - **FR-SYNC-6.** Conflicts are resolved with last write wins by server-accepted `updatedAt`. This can be refined later.
-- **FR-SYNC-7.** Completed, archived, and soft-deleted reminders are kept permanently as history. They are removed only when the account is deleted (see 2.2).
+- **FR-SYNC-7.** Completed, archived, and soft-deleted reminders, and archived and soft-deleted tags, are kept permanently as history. They are removed only when the account is deleted (see 2.2).
+- **FR-SYNC-8.** If two clients create tags with the same name, ignoring case, before they sync, the server keeps the tag that it accepted first, replaces the other tag's ID with it in all reminders, and soft-deletes the other tag. Both clients receive these changes on their next sync.
 
 Local storage:
 
@@ -203,7 +240,7 @@ Local storage:
 ## 9. Chrome extension
 
 - **FR-EXT-1.** Manifest V3, Chrome only for now.
-- **FR-EXT-2.** The popup opens on the main screen (section 3.4) and lets the user view, create, and edit reminders.
+- **FR-EXT-2.** The popup opens on the main screen (section 3.4) and lets the user view, create, and edit reminders. It has the same tag pages, Inbox, tag filters, and reminders without a date as the desktop app (sections 3.6 and 3.7).
 - **FR-EXT-3.** Shows the daily summary as a browser notification, including when the popup is closed.
 - **FR-EXT-4.** The toolbar icon shows the same badge as the desktop tray icon (FR-DESK-6), using the extension action badge.
 - **FR-EXT-5 (planned).** "Remind me about this page": one action creates a reminder from the current tab, with the page title as the editable title and the page URL in the description. It uses the `activeTab` permission, not access to all sites. URLs in descriptions are clickable in all clients.
@@ -238,7 +275,7 @@ Local storage:
 - Test runner: **Vitest** in all three projects. It works with Vite and TypeScript without extra configuration and has a Jest-compatible API. It also runs backend tests.
 - Backend integration tests use Supertest against the Express app and an in-memory MongoDB (`mongodb-memory-server`).
 - Integration tests are written together with the features, starting from the first endpoint.
-- Recurrence date calculations (including FR-REC-7), main screen grouping and sorting (including midnight rollover and the "next day" group skipping empty days), date-only sync, daily summary scheduling (once per day, and on a late start), time-zone changes, and rescheduling must have unit tests. Daylight saving transitions (FR-NOT-1c) must be tested for both a skipped hour and a repeated hour, in time zones of both hemispheres.
+- Recurrence date calculations (including FR-REC-7), main screen grouping and sorting (including midnight rollover and the "next day" group skipping empty days), tag page grouping, tag filters and hidden counts, exclusion of reminders without a date from counts and the daily summary, tag name uniqueness and merging on sync (FR-SYNC-8), date-only sync, daily summary scheduling (once per day, and on a late start), time-zone changes, and rescheduling must have unit tests. Daylight saving transitions (FR-NOT-1c) must be tested for both a skipped hour and a repeated hour, in time zones of both hemispheres.
 - Account deletion must have integration tests that check no user data remains on the server.
 
 ### 10.5 Build, packaging, and updates
@@ -278,7 +315,7 @@ Local storage:
 
 - Sentry is used in all three projects: backend, desktop app (main and renderer processes), and extension (popup and service worker).
 - Events are tagged with the environment and the release version. Source maps for release builds are uploaded to Sentry in CI.
-- Events must not contain reminder content (title, description, tags), email addresses, passwords, or tokens. Sensitive data is removed before sending. Users are identified only by their internal user ID.
+- Events must not contain reminder content (title, description), tag names, email addresses, passwords, or tokens. Sensitive data is removed before sending. Users are identified only by their internal user ID.
 - Crash reports are collected on the basis of legitimate interest, are described in the Privacy Policy, and do not need separate consent.
 
 ### 10.10 Analytics
@@ -296,7 +333,7 @@ Analytics has two levels.
 - GA4 is used only while the account has consent to usage statistics (see 2.1). Before sign-in, and while consent is not given, no events are sent and no analytics client ID is stored on the device.
 - When consent is withdrawn, the client stops sending events and deletes the stored analytics client ID.
 - Events are sent through the GA4 Measurement Protocol. Manifest V3 does not allow remote scripts, and `gtag.js` does not work reliably in Electron.
-- Events must not contain reminder content or personal data. The analytics client ID is a random value, not the email or user ID.
+- Events must not contain reminder content, tag names, or personal data. The analytics client ID is a random value, not the email or user ID.
 
 ### 10.11 Privacy Policy
 
