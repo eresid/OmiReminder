@@ -36,7 +36,7 @@ Each directory is an independent project with its own `package.json`.
 
 ## Status
 
-The project is in its initial planning stage.
+The project is in its initial planning stage. The Windows desktop app comes first, followed by macOS, Linux, and the Chrome extension. See [CHANGELOG.md](CHANGELOG.md) for the version plan.
 
 ## License
 

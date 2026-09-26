@@ -14,6 +14,7 @@ This file is the single source of truth for project instructions for all agents 
 ## Project
 
 - Requirements are in [REQUIREMENTS.md](REQUIREMENTS.md). Read the relevant sections before implementing a feature. If a change affects requirements, update that file in the same change.
+- The version plan is in [CHANGELOG.md](CHANGELOG.md). Work on the current planned version, and check off items in the same change that completes them.
 - The repository has three independent projects: `frontend/` (Electron desktop app), `extension/` (Chrome extension), and `backend/` (Express API). Each has its own `package.json` and lockfile. Do not add a root workspace or share code between them through imports.
 - Use pnpm. Do not use npm or yarn, and do not commit other lockfiles.
 - Use TypeScript with `strict` mode in all projects.

@@ -155,7 +155,7 @@ Local storage:
 
 ## 8. Desktop app
 
-- **FR-DESK-1.** Runs on Windows, macOS, and Linux.
+- **FR-DESK-1.** Runs on Windows, macOS, and Linux. Windows is supported first, and the other platforms follow in later versions (see [CHANGELOG.md](CHANGELOG.md)).
 - **FR-DESK-2.** Lives in the system tray. Closing the main window hides it to the tray instead of quitting. The tray menu has "Open", "New reminder", and "Quit".
 - **FR-DESK-3.** Launch at system startup, controlled by a setting that is on by default.
 - **FR-DESK-4.** Only one instance of the app runs at a time.
