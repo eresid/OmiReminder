@@ -71,8 +71,8 @@ interface AppActions {
   setToday: (today: string) => void;
   setView: (view: View) => void;
   /**
-   * Opens quick-add. On a tag page or in Inbox it defaults to "No date" and that tag (FR-TAG-5).
-   * `fromView: false` uses the plain defaults, as for the tray and the global shortcut.
+   * Opens quick-add with today as the date. On a tag page it also adds that tag (FR-TAG-5).
+   * `fromView: false` adds no tag, as for the tray and the global shortcut.
    */
   openQuickAdd: (options?: { fromView?: boolean }) => void;
   closeQuickAdd: () => void;
@@ -161,10 +161,7 @@ export const useAppStore = create<AppStore>()((set, get) => {
       const { view, today, tags } = get();
       const tagId = fromView ? tagIdOfView(view) : null;
       const onTagPage = tagId !== null && tags.some((tag) => tag.id === tagId);
-      const quickAddDefaults: QuickAddDefaults =
-        onTagPage || (fromView && view === "inbox")
-          ? { dueDate: null, tagIds: onTagPage ? [tagId] : [] }
-          : { dueDate: today, tagIds: [] };
+      const quickAddDefaults: QuickAddDefaults = { dueDate: today, tagIds: onTagPage ? [tagId] : [] };
       set({ quickAddOpen: true, quickAddDefaults, editingId: null });
     },
     closeQuickAdd() {

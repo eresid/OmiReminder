@@ -76,7 +76,7 @@ Tags as projects, reminders without a date, and tag filters in the Windows deskt
 - [x] Tag page and Inbox: overdue, by date, no date, and collapsed completed groups, with quick actions (FR-TAG-3, FR-TAG-4).
 - [x] Tag menu: rename, change color, archive and unarchive, and delete with confirmation (FR-TAG-6 to FR-TAG-8).
 - [x] Tags input on the full editing screen with suggestions from existing tags (FR-TAG-9).
-- [x] Quick-add on a tag page or in Inbox defaults to "No date" and presets the tag as a removable chip (FR-TAG-5).
+- [x] Quick-add on a tag page presets the tag as a removable chip; the date defaults to "Today" everywhere (FR-TAG-5).
 - [x] Reminders without a date: "No date" in the date-picker popup of quick-add and full editing, "Set date" quick action, and exclusion from the main screen, "All reminders", group counts, the tray badge, and the daily summary (FR-NODATE-1 to FR-NODATE-5).
 - [x] Tag filter on the main screen and the "All reminders" screen: several tags and "No tag", hidden count with overdue, clear action, kept per screen until the app quits (FR-TAG-10 to FR-TAG-12, FR-MAIN-9).
 - [ ] "Reschedule all" for the overdue group: today, tomorrow, or a chosen date, with Undo. With a tag filter, only the visible reminders (FR-MAIN-8, FR-TAG-12).
