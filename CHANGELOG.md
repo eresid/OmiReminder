@@ -63,8 +63,9 @@ Backend with authentication and reminders, and sync between the desktop app's lo
 - [ ] Settings: first day of the week and time format, synced with the account (section 6).
 - [ ] "Reschedule all" for the overdue group: today, tomorrow, or a chosen date, with Undo (FR-MAIN-8).
 - [ ] English and Ukrainian translations for all new strings.
+- [ ] Recalculate the main screen groups and the next summary time at local midnight, on resume, and after the device time zone changes (FR-MAIN-6, FR-NOT-1b). Midnight and resume are done; a real Windows time zone change is not verified yet.
 
-## [0.1.0] — Planned
+## [0.1.0] — 26.09.2026
 
 A local Windows desktop app: one-time date-based reminders, a main screen with overdue, today, and next day groups, and one daily summary notification, stored in a local SQLite database. No backend, no account, and no sync in this version.
 
@@ -94,7 +95,6 @@ A local Windows desktop app: one-time date-based reminders, a main screen with o
 - [x] Settings screen: language, launch at startup, and a locally stored daily notification time (FR-SET-1a).
 - [x] Theme setting: system (default), light, or dark (FR-SET-4).
 - [x] Unsigned portable Windows build with `pnpm package` (electron-builder): a portable `.exe` and an unpacked folder. Build and run instructions in README.md.
-- [ ] Recalculate the main screen groups and the next summary time at local midnight, on resume, and after the device time zone changes (FR-MAIN-6, FR-NOT-1b). Midnight and resume are done; a real Windows time zone change is not verified yet.
 - [x] Unit tests for the local database layer, main screen grouping and sorting, and daily summary scheduling.
 
 ## Later versions
