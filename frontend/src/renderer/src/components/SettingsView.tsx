@@ -50,21 +50,23 @@ export function SettingsView() {
       </header>
       <div className="settings">
         <SettingRow label={t("settings.language")} hint={t("settings.languageHint")} controlId={languageId}>
-          <select
-            id={languageId}
-            className="select"
-            aria-describedby={`${languageId}-hint`}
-            value={settings.language}
-            onChange={(event) => {
-              void updateSettings({ language: event.target.value as Language });
-            }}
-          >
-            {LANGUAGES.map((language) => (
-              <option key={language} value={language}>
-                {t(`languages.${language}`)}
-              </option>
-            ))}
-          </select>
+          <span className="select-wrap">
+            <select
+              id={languageId}
+              className="select"
+              aria-describedby={`${languageId}-hint`}
+              value={settings.language}
+              onChange={(event) => {
+                void updateSettings({ language: event.target.value as Language });
+              }}
+            >
+              {LANGUAGES.map((language) => (
+                <option key={language} value={language}>
+                  {t(`languages.${language}`)}
+                </option>
+              ))}
+            </select>
+          </span>
         </SettingRow>
 
         <SettingRow

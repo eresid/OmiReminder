@@ -83,7 +83,7 @@ A local Windows desktop app: one-time date-based reminders, a main screen with o
 - [x] "All reminders" screen sorted by date and priority (FR-REM-2).
 - [x] Compact quick-add for one-time reminders: Title, Today date button, Normal priority button, and create action. The date button opens a calendar popup (FR-REM-5, FR-REM-5a).
 - [x] Full reminder editing after creation, including description and tags (FR-REM-5b); view and delete one-time reminders (FR-REM-1).
-- [x] Mark a reminder as completed from the main screen, with Undo (FR-REM-4, FR-MAIN-7).
+- [x] Mark a reminder as completed from the main screen, with Undo. Completed reminders of today and the next day stay struck through at the bottom of their group (FR-REM-4, FR-MAIN-7).
 - [x] Reschedule a reminder: "Tomorrow" or a date picker (FR-REM-6).
 - [x] One daily summary notification with OS notification and sound at the locally configured daily notification time, only when there are overdue or today reminders. Clicking it opens the main screen (FR-NOT-1, FR-NOT-2, FR-NOT-4).
 - [x] Show the daily summary on a late start if it was missed that day, and never more than once per day (FR-NOT-1a, FR-NOT-5).

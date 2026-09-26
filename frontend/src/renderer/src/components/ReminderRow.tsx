@@ -14,9 +14,11 @@ interface ReminderRowProps {
   reminder: Reminder;
   /** Show the date in the row. Groups that already name the date hide it. */
   showDate?: boolean;
+  /** Show when a completed reminder was completed. The main screen hides it. */
+  showCompletedOn?: boolean;
 }
 
-export function ReminderRow({ reminder, showDate = false }: ReminderRowProps) {
+export function ReminderRow({ reminder, showDate = false, showCompletedOn = true }: ReminderRowProps) {
   const { t } = useTranslation();
   const format = useDateFormatter();
   const today = useAppStore((state) => state.today);
@@ -24,31 +26,35 @@ export function ReminderRow({ reminder, showDate = false }: ReminderRowProps) {
   const reopenReminder = useAppStore((state) => state.reopenReminder);
   const reschedule = useAppStore((state) => state.reschedule);
   const openEditor = useAppStore((state) => state.openEditor);
-  const [completing, setCompleting] = useState(false);
+  // The version of the reminder being completed. Any change to the reminder ends the animation.
+  const [completingVersion, setCompletingVersion] = useState<string | null>(null);
   const rescheduleRef = useRef<HTMLButtonElement>(null);
   const popover = usePopover();
 
   const isCompleted = reminder.status === "completed";
   const isOverdue = !isCompleted && reminder.dueDate < today;
+  const completing = !isCompleted && completingVersion === reminder.updatedAt;
 
   function toggleCompleted(): void {
     if (isCompleted) {
       void reopenReminder(reminder);
       return;
     }
-    setCompleting(true);
+    setCompletingVersion(reminder.updatedAt);
     window.setTimeout(() => {
       void completeReminder(reminder);
     }, COMPLETE_ANIMATION_MS);
   }
 
   const meta: React.ReactNode[] = [];
-  if (isCompleted && reminder.completedAt) {
-    meta.push(
-      <span key="completed">
-        {t("all.completedOn", { date: format.shortDate(toDateOnly(new Date(reminder.completedAt))) })}
-      </span>
-    );
+  if (isCompleted) {
+    if (showCompletedOn && reminder.completedAt) {
+      meta.push(
+        <span key="completed">
+          {t("all.completedOn", { date: format.shortDate(toDateOnly(new Date(reminder.completedAt))) })}
+        </span>
+      );
+    }
   } else if (showDate) {
     meta.push(
       <span key="date" className={isOverdue ? "tone-danger" : ""}>

@@ -84,11 +84,12 @@ export function createMockApi(): OmiApi {
       return changed(undefined);
     },
     completeReminder: (id) => {
-      Object.assign(find(id), { status: "completed", completedAt: new Date().toISOString() });
+      const now = new Date().toISOString();
+      Object.assign(find(id), { status: "completed", completedAt: now, updatedAt: now });
       return changed(undefined);
     },
     reopenReminder: (id) => {
-      Object.assign(find(id), { status: "active", completedAt: null });
+      Object.assign(find(id), { status: "active", completedAt: null, updatedAt: new Date().toISOString() });
       return changed(undefined);
     },
     setDueDates: (changes) => {

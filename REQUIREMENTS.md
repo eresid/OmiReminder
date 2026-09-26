@@ -102,20 +102,20 @@ The registration form has two separate checkboxes. Both are unchecked by default
 
 ### 3.4 Main screen
 
-- **FR-MAIN-1.** The main screen shows active reminders in up to three groups, in this order:
+- **FR-MAIN-1.** The main screen shows reminders in up to three groups, in this order:
 
   | Group | Contents | Shown when |
   |---|---|---|
-  | Overdue | Reminders whose date is before today | there is at least one |
+  | Overdue | Active reminders whose date is before today | there is at least one |
   | Today | Reminders due today | always, with an empty state if there are none |
-  | Next day | Reminders on the nearest date after today that has any, for example Monday when today is Friday and the weekend is empty | there is at least one later reminder |
+  | Next day | Reminders on the nearest date after today that has any, active or completed, for example Monday when today is Friday and the weekend is empty | there is at least one later reminder |
 
 - **FR-MAIN-2.** The overdue group is always at the top and is highlighted in red, so the user either completes or reschedules each item. Color is not the only signal: the group has an "Overdue" heading and each item shows its original date. The red must keep sufficient contrast in light and dark themes.
 - **FR-MAIN-3.** Each item on the main screen offers quick actions: complete (FR-REM-4) and reschedule (FR-REM-6).
 - **FR-MAIN-4.** The next day group is titled "Tomorrow" when it is tomorrow, and otherwise with the weekday and date, for example "Monday, 29 September". Only that one date is shown; later reminders are on the "All reminders" screen.
-- **FR-MAIN-5.** Within each group, items are sorted by priority (high first), then by date (oldest first, which matters only for overdue items), then by creation time.
+- **FR-MAIN-5.** Within each group, active items are sorted by priority (high first), then by date (oldest first, which matters only for overdue items), then by creation time. Completed items follow them (FR-MAIN-7).
 - **FR-MAIN-6.** "Today" is the current local date of the device. The groups are recalculated at local midnight, when the app resumes, and when the device time zone changes.
-- **FR-MAIN-7.** Completed items disappear from the main screen, with a short "Undo" option.
+- **FR-MAIN-7.** A reminder completed for today or for the shown next day stays in its group, struck through, below the active items and in the order of completion. A short "Undo" option appears after completing, and clicking the struck item marks it as not completed again. Completed overdue items leave the main screen. Group counts, the tray badge, and the daily summary count only active reminders.
 - **FR-MAIN-8.** The overdue group header has a "Reschedule all" action that moves every overdue reminder at once to today, tomorrow, or a date chosen in a date picker. Each reminder is rescheduled as in FR-REM-6a. The action can be undone with a short "Undo" option.
 
 ### 3.5 Progress

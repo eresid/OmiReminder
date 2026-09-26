@@ -95,6 +95,12 @@ describe("daily summary content", () => {
     expect(buildDailySummary([makeReminder({ dueDate: "2026-09-27" })], "2026-09-26")).toBeNull();
   });
 
+  it("ignores reminders already completed for today", () => {
+    const done = makeReminder({ dueDate: "2026-09-26", status: "completed" });
+    expect(buildDailySummary([done], "2026-09-26")).toBeNull();
+    expect(buildDailySummary([done, makeReminder({ dueDate: "2026-09-26" })], "2026-09-26")?.todayCount).toBe(1);
+  });
+
   it("counts reminders and lists the first titles in main screen order", () => {
     const reminders = [
       makeReminder({ title: "Today normal", dueDate: "2026-09-26" }),

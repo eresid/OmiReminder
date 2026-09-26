@@ -330,10 +330,6 @@ p {
   transition: opacity 0.2s ease;
 }
 
-.row.is-completing {
-  opacity: 0.4;
-}
-
 .check {
   display: grid;
   place-items: center;
@@ -894,6 +890,32 @@ p {
   background: var(--bg);
 }
 
+/* The native arrow of a select cannot be spaced, so it is replaced by a chevron in the theme color. */
+.select-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.select {
+  appearance: none;
+  padding-right: 32px;
+  cursor: pointer;
+}
+
+.select-wrap::after {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  width: 14px;
+  height: 14px;
+  background: var(--text-muted);
+  content: "";
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
 .switch {
   position: relative;
   width: 36px;
@@ -928,8 +950,9 @@ p {
 .toast-region {
   position: fixed;
   bottom: 20px;
-  left: 20px;
+  left: 50%;
   z-index: 10;
+  transform: translateX(-50%);
 }
 
 .toast {

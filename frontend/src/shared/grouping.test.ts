@@ -5,7 +5,7 @@ import { makeReminder } from "./testUtils";
 const TODAY = "2026-09-25"; // Friday
 
 describe("main screen groups", () => {
-  it("splits active reminders into overdue, today, and the next day that has reminders", () => {
+  it("splits reminders into overdue, today, and the next day that has reminders", () => {
     const overdue = makeReminder({ dueDate: "2026-09-20" });
     const today = makeReminder({ dueDate: TODAY });
     const monday = makeReminder({ dueDate: "2026-09-28" });
@@ -15,9 +15,34 @@ describe("main screen groups", () => {
     const groups = groupForMainScreen([later, monday, today, overdue, completed], TODAY);
 
     expect(groups.overdue).toEqual([overdue]);
-    expect(groups.today).toEqual([today]);
+    expect(groups.today).toEqual([today, completed]);
     // The weekend is empty, so the next day with reminders is Monday.
     expect(groups.next).toEqual({ date: "2026-09-28", reminders: [monday] });
+  });
+
+  it("keeps completed reminders of today and the next day at the bottom, in completion order", () => {
+    const high = makeReminder({ dueDate: TODAY, priority: "high" });
+    const low = makeReminder({ dueDate: TODAY, priority: "low" });
+    const doneLater = makeReminder({
+      dueDate: TODAY,
+      priority: "high",
+      status: "completed",
+      completedAt: "2026-09-25T10:00:00.000Z",
+    });
+    const doneEarlier = makeReminder({ dueDate: TODAY, status: "completed", completedAt: "2026-09-25T08:00:00.000Z" });
+    const doneOverdue = makeReminder({ dueDate: "2026-09-20", status: "completed" });
+    const archived = makeReminder({ dueDate: TODAY, status: "archived" });
+
+    const groups = groupForMainScreen([doneLater, low, doneEarlier, high, doneOverdue, archived], TODAY);
+
+    expect(groups.today).toEqual([high, low, doneEarlier, doneLater]);
+    expect(groups.overdue).toEqual([]);
+  });
+
+  it("keeps the next day when all its reminders are completed", () => {
+    const done = makeReminder({ dueDate: "2026-09-26", status: "completed" });
+    const later = makeReminder({ dueDate: "2026-09-30" });
+    expect(groupForMainScreen([later, done], TODAY).next).toEqual({ date: "2026-09-26", reminders: [done] });
   });
 
   it("has no next group when nothing is planned after today", () => {

@@ -20,6 +20,7 @@ describe("TodayView", () => {
     useAppStore.setState({
       today: TODAY,
       environment: { systemLocale: "en-GB", firstDayOfWeek: 1, today: TODAY },
+      completed: [],
       active: [
         makeReminder({ title: "Next week", dueDate: "2026-10-02" }),
         makeReminder({ title: "Monday task", dueDate: "2026-09-28" }),
@@ -46,8 +47,26 @@ describe("TodayView", () => {
     expect(screen.queryByText("Next week")).toBeNull();
   });
 
+  it("keeps completed reminders struck through at the bottom of their day", () => {
+    useAppStore.setState({
+      today: TODAY,
+      active: [makeReminder({ title: "Still to do", dueDate: TODAY, priority: "low" })],
+      completed: [
+        makeReminder({ title: "Done today", dueDate: TODAY, priority: "high", status: "completed", completedAt: "x" }),
+        makeReminder({ title: "Done earlier", dueDate: "2026-09-01", status: "completed", completedAt: "y" }),
+      ],
+    });
+
+    render(<TodayView />);
+
+    const rows = screen.getAllByRole("listitem");
+    expect(rows.map((row) => row.querySelector(".row-title")?.textContent)).toEqual(["Still to do", "Done today"]);
+    expect(rows[1]?.classList.contains("is-completed")).toBe(true);
+    expect(screen.getByRole("button", { name: "Mark as not completed" })).toBeTruthy();
+  });
+
   it("shows an empty state when nothing is due", () => {
-    useAppStore.setState({ today: TODAY, active: [] });
+    useAppStore.setState({ today: TODAY, active: [], completed: [] });
     render(<TodayView />);
     expect(screen.getByText("All clear for today")).toBeTruthy();
     expect(screen.queryByRole("region", { name: "Overdue" })).toBeNull();

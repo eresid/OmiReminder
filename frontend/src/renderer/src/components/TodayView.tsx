@@ -1,7 +1,7 @@
 import { useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { addDays } from "../../../shared/dates";
-import { groupForMainScreen } from "../../../shared/grouping";
+import { countActive, groupForMainScreen } from "../../../shared/grouping";
 import type { Reminder } from "../../../shared/types";
 import { useDateFormatter } from "../hooks";
 import { useAppStore } from "../store";
@@ -65,7 +65,9 @@ export function TodayView() {
   const format = useDateFormatter();
   const today = useAppStore((state) => state.today);
   const active = useAppStore((state) => state.active);
-  const groups = useMemo(() => groupForMainScreen(active, today), [active, today]);
+  const completed = useAppStore((state) => state.completed);
+  // Reminders completed for today or the next day stay in their group, struck through (FR-MAIN-7).
+  const groups = useMemo(() => groupForMainScreen([...active, ...completed], today), [active, completed, today]);
   const hasOverdue = groups.overdue.length > 0;
 
   return (
@@ -94,13 +96,13 @@ export function TodayView() {
         {hasOverdue ? (
           <div className="group-header">
             <h2 id="group-today">{t("dates.today")}</h2>
-            <span className="group-count">{groups.today.length}</span>
+            <span className="group-count">{countActive(groups.today)}</span>
           </div>
         ) : null}
         {groups.today.length > 0 ? (
           <ul className="rows">
             {groups.today.map((reminder) => (
-              <ReminderRow key={reminder.id} reminder={reminder} />
+              <ReminderRow key={reminder.id} reminder={reminder} showCompletedOn={false} />
             ))}
           </ul>
         ) : (
@@ -119,11 +121,11 @@ export function TodayView() {
             <h2 id="group-next">
               {groups.next.date === addDays(today, 1) ? t("dates.tomorrow") : format.dayHeading(groups.next.date)}
             </h2>
-            <span className="group-count">{groups.next.reminders.length}</span>
+            <span className="group-count">{countActive(groups.next.reminders)}</span>
           </div>
           <ul className="rows">
             {groups.next.reminders.map((reminder) => (
-              <ReminderRow key={reminder.id} reminder={reminder} />
+              <ReminderRow key={reminder.id} reminder={reminder} showCompletedOn={false} />
             ))}
           </ul>
         </section>

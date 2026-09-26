@@ -77,7 +77,8 @@ export const SUMMARY_TITLE_LIMIT = 3;
 
 /** The summary content in main screen order, or `null` if nothing is overdue or due today. */
 export function buildDailySummary(reminders: readonly Reminder[], today: string): DailySummary | null {
-  const groups = groupForMainScreen(reminders, today);
+  const active = reminders.filter((reminder) => reminder.status === "active");
+  const groups = groupForMainScreen(active, today);
   const items = [...groups.overdue, ...groups.today];
   if (items.length === 0) {
     return null;

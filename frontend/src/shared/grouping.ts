@@ -20,20 +20,37 @@ export function compareByDate(a: Reminder, b: Reminder): number {
   );
 }
 
+/** Completed reminders go below active ones, in the order they were completed. */
+function compareWithinDay(a: Reminder, b: Reminder): number {
+  const aCompleted = a.status === "completed";
+  const bCompleted = b.status === "completed";
+  if (aCompleted !== bCompleted) {
+    return aCompleted ? 1 : -1;
+  }
+  if (aCompleted) {
+    return (a.completedAt ?? "").localeCompare(b.completedAt ?? "") || compareForMainScreen(a, b);
+  }
+  return compareForMainScreen(a, b);
+}
+
 export interface MainScreenGroups {
   overdue: Reminder[];
+  /** Active reminders due today, then reminders completed for today (FR-MAIN-7). */
   today: Reminder[];
-  /** The nearest date after today that has reminders, or `null` if there is none. */
+  /** The nearest date after today that has any reminders, or `null` if there is none. */
   next: { date: string; reminders: Reminder[] } | null;
 }
 
 export function groupForMainScreen(reminders: readonly Reminder[], today: string): MainScreenGroups {
-  const active = reminders.filter((reminder) => reminder.status === "active");
-  const overdue = active.filter((reminder) => reminder.dueDate < today).sort(compareForMainScreen);
-  const dueToday = active.filter((reminder) => reminder.dueDate === today).sort(compareForMainScreen);
+  const shown = reminders.filter((reminder) => reminder.status === "active" || reminder.status === "completed");
+  const overdue = shown
+    .filter((reminder) => reminder.status === "active" && reminder.dueDate < today)
+    .sort(compareForMainScreen);
+  const onDate = (date: string): Reminder[] =>
+    shown.filter((reminder) => reminder.dueDate === date).sort(compareWithinDay);
 
   let nextDate: string | null = null;
-  for (const reminder of active) {
+  for (const reminder of shown) {
     if (reminder.dueDate > today && (nextDate === null || reminder.dueDate < nextDate)) {
       nextDate = reminder.dueDate;
     }
@@ -41,15 +58,13 @@ export function groupForMainScreen(reminders: readonly Reminder[], today: string
 
   return {
     overdue,
-    today: dueToday,
-    next:
-      nextDate === null
-        ? null
-        : {
-            date: nextDate,
-            reminders: active.filter((reminder) => reminder.dueDate === nextDate).sort(compareForMainScreen),
-          },
+    today: onDate(today),
+    next: nextDate === null ? null : { date: nextDate, reminders: onDate(nextDate) },
   };
+}
+
+export function countActive(reminders: readonly Reminder[]): number {
+  return reminders.filter((reminder) => reminder.status === "active").length;
 }
 
 export interface AttentionCounts {
