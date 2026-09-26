@@ -13,7 +13,7 @@ See [REQUIREMENTS.md](REQUIREMENTS.md) for the full requirements.
 - Offline mode with a local cache and automatic sync
 - Email and password sign-in, with account deletion from settings
 - English and Ukrainian UI
-- Windows, macOS, and Linux desktop app, plus a Chrome extension
+- Desktop app for Windows (macOS and Linux are planned), plus a Chrome extension
 
 ## Technology stack
 
@@ -83,6 +83,8 @@ Reminders and settings are stored in `%APPDATA%\OmiReminder`, separately from de
 ## Status
 
 The project is in its initial planning stage. The Windows desktop app comes first, followed by macOS, Linux, and the Chrome extension. See [CHANGELOG.md](CHANGELOG.md) for the version plan.
+
+The desktop app currently supports only Windows. We are looking for maintainers to help support macOS and Linux. If you would like to help, please open an issue or a pull request.
 
 ## License
 
