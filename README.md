@@ -15,6 +15,52 @@ See [REQUIREMENTS.md](REQUIREMENTS.md) for the full requirements.
 - English and Ukrainian UI
 - Desktop app for Windows (macOS and Linux are planned), plus a Chrome extension
 
+## Screenshots
+
+A quick visual tour of the desktop app (version 0.1) with sample data.
+
+**Today** shows overdue reminders at the top, today's reminders sorted by priority, and the next day that has reminders.
+
+![Today](screens/01-today.png)
+
+**Quick add** needs only a name. The date, priority, and tag are optional and default to today, normal, and the current tag.
+
+![Quick add](screens/02-quick-add.png)
+
+The **date picker** offers Today, Tomorrow, No date, and a calendar.
+
+![Date picker](screens/03-date-picker.png)
+
+**Editing** a reminder adds a description and tags.
+
+![Edit reminder](screens/04-edit-reminder.png)
+
+**Reschedule** moves one reminder, or all overdue reminders at once, to another date.
+
+![Reschedule](screens/05-reschedule.png)
+
+**All reminders** groups active reminders by date and has a switch for completed ones.
+
+![All reminders](screens/06-all-reminders.png)
+
+A **tag view** works like a project and also lists reminders without a date.
+
+![Tag view](screens/07-tag-view.png)
+
+**Settings** hold the language, theme, launch at startup, and the local time of the daily summary.
+
+![Settings](screens/08-settings.png)
+
+The app follows the system **dark theme**.
+
+![Today in dark theme](screens/09-today-dark.png)
+
+![Settings in dark theme](screens/10-settings-dark.png)
+
+The UI is available in **Ukrainian** as well as English.
+
+![Today in Ukrainian](screens/11-today-ukrainian.png)
+
 ## Technology stack
 
 | Project | Stack |
