@@ -12,7 +12,7 @@ import { Popover, usePopover } from "./Popover";
 import { ReminderRow } from "./ReminderRow";
 import { FilterEmptyState, HiddenNotice, TagFilterButton } from "./TagFilter";
 
-function RescheduleAllButton({ reminders }: { reminders: readonly Reminder[] }) {
+export function RescheduleAllButton({ reminders }: { reminders: readonly Reminder[] }) {
   const { t } = useTranslation();
   const today = useAppStore((state) => state.today);
   const reschedule = useAppStore((state) => state.reschedule);

@@ -36,6 +36,9 @@ describe("TagView", () => {
 
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Shopify course");
     expect(within(screen.getByRole("region", { name: "Overdue" })).getByText("Late lesson")).toBeTruthy();
+    expect(
+      within(screen.getByRole("region", { name: "Overdue" })).getByText("Reschedule", { selector: ".link-button" })
+    ).toBeTruthy();
     const undated = screen.getByRole("region", { name: "No date" });
     expect(within(undated).getByText("Watch the lesson")).toBeTruthy();
     // The row shows the other tag, not the tag of the page.

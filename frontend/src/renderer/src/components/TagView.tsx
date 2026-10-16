@@ -11,7 +11,7 @@ import { Popover, usePopover } from "./Popover";
 import { ReminderRow } from "./ReminderRow";
 import { DeleteTagDialog, TagNameDialog } from "./TagDialogs";
 import { TagDot } from "./TagDot";
-import { AddReminderRow } from "./TodayView";
+import { AddReminderRow, RescheduleAllButton } from "./TodayView";
 
 type TagDialog = "rename" | "delete" | null;
 
@@ -145,6 +145,7 @@ export function TagView({ tagId }: { tagId: string | null }) {
           <div className="group-header">
             <h2 id="tag-group-overdue">{t("today.overdue")}</h2>
             <span className="group-count">{groups.overdue.length}</span>
+            <RescheduleAllButton reminders={groups.overdue} />
           </div>
           <ul className="rows">
             {groups.overdue.map((reminder) => (
