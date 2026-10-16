@@ -10,6 +10,7 @@ import { AppTray } from "./appTray";
 import { openDatabase } from "./database";
 import { DayScheduler } from "./dayScheduler";
 import { createMainI18n } from "./i18n";
+import type { TrayIconTheme } from "./icons/icons";
 import { registerIpcHandlers } from "./ipc";
 import { createAppIcon } from "./nativeIcons";
 import { ReminderRepository } from "./reminderRepository";
@@ -20,6 +21,10 @@ import { formatDailySummary } from "./summaryText";
 /** Matches `--bg` in the renderer, so the window does not flash while it loads. */
 function windowBackground(): string {
   return nativeTheme.shouldUseDarkColors ? "#1c1c1e" : "#ffffff";
+}
+
+function systemIconTheme(): TrayIconTheme {
+  return nativeTheme.shouldUseDarkColorsForSystemIntegratedUI ? "dark" : "light";
 }
 
 const HIDDEN_ARGUMENT = "--hidden";
@@ -88,7 +93,7 @@ function start(): void {
       minHeight: 480,
       show: false,
       title: "OmiReminder",
-      icon: createAppIcon(),
+      icon: createAppIcon(systemIconTheme()),
       backgroundColor: windowBackground(),
       webPreferences: {
         preload: join(__dirname, "../preload/index.js"),
@@ -143,17 +148,21 @@ function start(): void {
     onSummaryDue: showDailySummary,
   });
 
-  const tray = new AppTray(i18n, {
-    open: () => {
-      showWindow("today");
+  const tray = new AppTray(
+    i18n,
+    {
+      open: () => {
+        showWindow("today");
+      },
+      newReminder: () => {
+        showWindow("quick-add");
+      },
+      quit: () => {
+        app.quit();
+      },
     },
-    newReminder: () => {
-      showWindow("quick-add");
-    },
-    quit: () => {
-      app.quit();
-    },
-  });
+    systemIconTheme() === "dark"
+  );
 
   function refreshTray(): void {
     tray.update(countAttention(reminders.list("active"), scheduler.getToday()));
@@ -168,7 +177,7 @@ function start(): void {
     const notification = new Notification({
       title: text.title,
       body: text.body,
-      icon: createAppIcon(),
+      icon: createAppIcon(systemIconTheme()),
       silent: false,
     });
     notification.on("click", () => {
@@ -239,6 +248,13 @@ function start(): void {
   });
   // The app keeps running in the tray when the window is closed.
   app.on("window-all-closed", () => undefined);
+
+  // Windows uses the same window icon in the taskbar and title bar, so both follow its system UI.
+  nativeTheme.on("updated", () => {
+    const theme = systemIconTheme();
+    tray.setDarkTheme(theme === "dark");
+    mainWindow?.setIcon(createAppIcon(theme));
+  });
 
   powerMonitor.on("resume", () => {
     scheduler.tick();

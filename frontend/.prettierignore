@@ -1,4 +1,5 @@
 out/
 dist/
 coverage/
+.icon-generator/
 pnpm-lock.yaml

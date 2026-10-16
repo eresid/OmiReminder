@@ -1,6 +1,14 @@
 import { inflateSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
-import { ACCENT, BADGE_ALERT, BADGE_NEUTRAL, renderAppIcon, renderTrayIcon, trayBadgeFor } from "./icons";
+import {
+  BADGE_ALERT,
+  BADGE_NEUTRAL,
+  ICON_ON_DARK,
+  ICON_ON_LIGHT,
+  renderAppIcon,
+  renderTrayIcon,
+  trayBadgeFor,
+} from "./icons";
 import { encodePng } from "./png";
 
 describe("tray badge", () => {
@@ -19,19 +27,27 @@ describe("tray badge", () => {
 });
 
 describe("icon rendering", () => {
-  it("draws the app mark with transparent corners", () => {
-    const icon = renderAppIcon(32);
-    expect(icon.pixel(0, 0)[3]).toBe(0);
-    expect(icon.pixel(6, 6)).toEqual(ACCENT);
+  it("draws a monochrome app mark without a background", () => {
+    const light = renderAppIcon(32, "light");
+    const dark = renderAppIcon(32, "dark");
+    expect(light.pixel(0, 0)[3]).toBe(0);
+    expect(light.pixel(2, 16)[3]).toBe(0);
+    expect(light.pixel(6, 8).slice(0, 3)).toEqual(ICON_ON_LIGHT.slice(0, 3));
+    expect(dark.pixel(6, 8).slice(0, 3)).toEqual(ICON_ON_DARK.slice(0, 3));
+  });
+
+  it("uses a contrasting calendar mark for both Windows toolbar themes", () => {
+    const light = renderTrayIcon(32, null, "light");
+    const dark = renderTrayIcon(32, null, "dark");
+    expect(light.pixel(6, 8).slice(0, 3)).toEqual(ICON_ON_LIGHT.slice(0, 3));
+    expect(dark.pixel(6, 8).slice(0, 3)).toEqual(ICON_ON_DARK.slice(0, 3));
   });
 
   it("draws the badge in the bottom-right corner", () => {
-    const plain = renderTrayIcon(32, null);
-    const badged = renderTrayIcon(32, { label: "3", color: BADGE_ALERT });
-    expect(plain.pixel(24, 20)).toEqual(ACCENT);
+    const badged = renderTrayIcon(32, { label: "3", color: BADGE_ALERT }, "light");
     // The badge edge is red, and the top-left of the mark is unchanged.
     expect(badged.pixel(24, 16)).toEqual(BADGE_ALERT);
-    expect(badged.pixel(6, 6)).toEqual(ACCENT);
+    expect(badged.pixel(6, 8).slice(0, 3)).toEqual(ICON_ON_LIGHT.slice(0, 3));
   });
 });
 

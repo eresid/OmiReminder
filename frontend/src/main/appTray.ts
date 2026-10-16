@@ -1,7 +1,7 @@
 import { Menu, Tray } from "electron";
 import type { i18n } from "i18next";
 import type { AttentionCounts } from "../shared/grouping";
-import { trayBadgeFor } from "./icons/icons";
+import { trayBadgeFor, type TrayBadge } from "./icons/icons";
 import { createTrayIcon } from "./nativeIcons";
 import { formatTrayTooltip } from "./summaryText";
 
@@ -16,12 +16,14 @@ export class AppTray {
   private readonly tray: Tray;
   private counts: AttentionCounts = { overdue: 0, today: 0 };
   private badgeKey = "";
+  private badge: TrayBadge | null = null;
 
   constructor(
     private i18n: i18n,
-    private readonly actions: AppTrayActions
+    private readonly actions: AppTrayActions,
+    private darkTheme: boolean
   ) {
-    this.tray = new Tray(createTrayIcon(null));
+    this.tray = new Tray(createTrayIcon(null, this.iconTheme()));
     this.tray.on("click", actions.open);
     this.renderMenu();
     this.renderTooltip();
@@ -39,9 +41,17 @@ export class AppTray {
     const badgeKey = badge ? `${badge.label}:${badge.color.join(",")}` : "";
     if (badgeKey !== this.badgeKey) {
       this.badgeKey = badgeKey;
-      this.tray.setImage(createTrayIcon(badge));
+      this.badge = badge;
+      this.updateIcon();
     }
     this.renderTooltip();
+  }
+
+  setDarkTheme(darkTheme: boolean): void {
+    if (this.darkTheme !== darkTheme) {
+      this.darkTheme = darkTheme;
+      this.updateIcon();
+    }
   }
 
   destroy(): void {
@@ -50,6 +60,14 @@ export class AppTray {
 
   private renderTooltip(): void {
     this.tray.setToolTip(formatTrayTooltip(this.i18n.t, this.counts));
+  }
+
+  private iconTheme(): "light" | "dark" {
+    return this.darkTheme ? "dark" : "light";
+  }
+
+  private updateIcon(): void {
+    this.tray.setImage(createTrayIcon(this.badge, this.iconTheme()));
   }
 
   private renderMenu(): void {

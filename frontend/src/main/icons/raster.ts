@@ -110,3 +110,8 @@ export function segment(x1: number, y1: number, x2: number, y2: number, halfWidt
 export function union(...shapes: Shape[]): Shape {
   return (x, y) => shapes.some((shape) => shape(x, y));
 }
+
+/** Keeps the first shape while cutting out every following shape. */
+export function subtract(base: Shape, ...cutouts: Shape[]): Shape {
+  return (x, y) => base(x, y) && cutouts.every((cutout) => !cutout(x, y));
+}

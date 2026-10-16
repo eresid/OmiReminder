@@ -1,8 +1,9 @@
 import type { AttentionCounts } from "../../shared/grouping";
-import { Raster, circle, roundedRect, segment, union, type Rgba } from "./raster";
+import { Raster, circle, roundedRect, segment, subtract, type Rgba } from "./raster";
 
-export const ACCENT: Rgba = [66, 99, 235, 255];
 const WHITE: Rgba = [255, 255, 255, 255];
+export const ICON_ON_LIGHT: Rgba = [20, 22, 27, 255];
+export const ICON_ON_DARK: Rgba = [213, 216, 222, 255];
 export const BADGE_ALERT: Rgba = [217, 48, 37, 255];
 export const BADGE_NEUTRAL: Rgba = [95, 99, 104, 255];
 
@@ -21,24 +22,32 @@ const GLYPHS: Record<string, readonly string[]> = {
   "+": ["...", ".#.", "###", ".#.", "..."],
 };
 
-/** The app mark: a rounded square with a check mark. */
-function drawMark(raster: Raster): void {
+export type TrayIconTheme = "light" | "dark";
+
+/** Draws the monochrome OmiReminder calendar mark. */
+function drawMark(raster: Raster, color: Rgba): void {
   const size = raster.width;
-  const inset = size * 0.04;
-  raster.fill(roundedRect(inset, inset, size - inset * 2, size - inset * 2, size * 0.24), ACCENT);
-  const halfWidth = size * 0.07;
+  const stroke = size * 0.09;
+  const left = size * 0.16;
+  const top = size * 0.2;
+  const width = size * 0.68;
+  const height = size * 0.67;
+  const corner = size * 0.15;
   raster.fill(
-    union(
-      segment(size * 0.27, size * 0.52, size * 0.43, size * 0.68, halfWidth),
-      segment(size * 0.43, size * 0.68, size * 0.73, size * 0.35, halfWidth)
+    subtract(
+      roundedRect(left, top, width, height, corner),
+      roundedRect(left + stroke, top + stroke, width - stroke * 2, height - stroke * 2, Math.max(0, corner - stroke))
     ),
-    WHITE
+    color
   );
+  raster.fill(segment(size * 0.22, size * 0.42, size * 0.78, size * 0.42, stroke / 2), color);
+  raster.fill(segment(size * 0.36, size * 0.1, size * 0.36, size * 0.29, stroke / 2), color);
+  raster.fill(segment(size * 0.64, size * 0.1, size * 0.64, size * 0.29, stroke / 2), color);
 }
 
-export function renderAppIcon(size: number): Raster {
+export function renderAppIcon(size: number, theme: TrayIconTheme): Raster {
   const raster = new Raster(size, size);
-  drawMark(raster);
+  drawMark(raster, theme === "dark" ? ICON_ON_DARK : ICON_ON_LIGHT);
   return raster;
 }
 
@@ -59,8 +68,9 @@ export function trayBadgeFor(counts: AttentionCounts): TrayBadge | null {
   };
 }
 
-export function renderTrayIcon(size: number, badge: TrayBadge | null): Raster {
-  const raster = renderAppIcon(size);
+export function renderTrayIcon(size: number, badge: TrayBadge | null, theme: TrayIconTheme): Raster {
+  const raster = new Raster(size, size);
+  drawMark(raster, theme === "dark" ? ICON_ON_DARK : ICON_ON_LIGHT);
   if (!badge) {
     return raster;
   }

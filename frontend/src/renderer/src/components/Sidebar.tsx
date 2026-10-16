@@ -59,12 +59,7 @@ export function Sidebar() {
 
   return (
     <nav className="sidebar" aria-label="OmiReminder">
-      <div className="brand">
-        <span className="brand-mark" aria-hidden="true">
-          <Icon name="check" size={14} />
-        </span>
-        OmiReminder
-      </div>
+      <div className="brand">OmiReminder</div>
       <div className="nav-group">
         {NAV_ITEMS.map((item) => (
           <div key={item.view}>

@@ -1,6 +1,6 @@
 import { nativeImage, type NativeImage } from "electron";
 import { encodePng } from "./icons/png";
-import { renderAppIcon, renderTrayIcon, type TrayBadge } from "./icons/icons";
+import { renderAppIcon, renderTrayIcon, type TrayBadge, type TrayIconTheme } from "./icons/icons";
 import type { Raster } from "./icons/raster";
 
 function toPng(raster: Raster): Buffer {
@@ -18,10 +18,10 @@ function withScales(baseSize: number, render: (size: number) => Raster): NativeI
   return image;
 }
 
-export function createAppIcon(): NativeImage {
-  return withScales(64, renderAppIcon);
+export function createAppIcon(theme: TrayIconTheme): NativeImage {
+  return withScales(64, (size) => renderAppIcon(size, theme));
 }
 
-export function createTrayIcon(badge: TrayBadge | null): NativeImage {
-  return withScales(16, (size) => renderTrayIcon(size, badge));
+export function createTrayIcon(badge: TrayBadge | null, theme: TrayIconTheme): NativeImage {
+  return withScales(16, (size) => renderTrayIcon(size, badge, theme));
 }
