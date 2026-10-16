@@ -72,6 +72,7 @@ Tags as projects, reminders without a date, and tag filters in the Windows deskt
 
 - [x] Tags as separate records in the local database: client-generated UUID `id`, name unique ignoring case, optional color, `archivedAt`, UTC `createdAt` and `updatedAt`, and soft delete with `deletedAt` (section 3.6). Reminders reference tags by `tagIds` instead of tag names. The initial schema is changed in place, without a migration, because there is no local data to keep: a local database from 0.1.0 must be deleted before starting 0.2.0.
 - [x] Optional `dueDate` in the local database, validation, and IPC (section 3.1, FR-NODATE-1).
+- [x] "Add reminder" is a floating action button at the bottom right of every screen instead of a sidebar item; it presets the tag on a tag page (FR-REM-5, FR-TAG-5).
 - [x] Sidebar "Tags" section: Inbox, non-archived tags with active reminder counts, creating a tag, and a collapsed "Archived" entry (FR-TAG-2, FR-TAG-4, FR-TAG-7).
 - [x] Tag page and Inbox: overdue, by date, no date, and collapsed completed groups, with quick actions (FR-TAG-3, FR-TAG-4).
 - [x] Tag menu: rename, change color, archive and unarchive, and delete with confirmation (FR-TAG-6 to FR-TAG-8).

@@ -360,27 +360,6 @@ p {
   font-variant-numeric: tabular-nums;
 }
 
-.nav-add {
-  margin-bottom: 8px;
-  color: var(--accent);
-  font-weight: 600;
-}
-
-.nav-add-icon {
-  display: grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  color: var(--accent-text);
-  background: var(--accent);
-}
-
-.nav-add-icon svg {
-  color: inherit;
-  stroke-width: 2.5;
-}
-
 /* Groups and rows */
 
 .group + .group {
@@ -1343,4 +1322,30 @@ p {
   .view {
     padding: 24px 20px 96px;
   }
+}
+
+/* Floating action button */
+
+.fab {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  color: var(--accent-text);
+  background: var(--accent);
+  box-shadow: var(--shadow);
+}
+
+.fab svg {
+  color: inherit;
+  stroke-width: 2.5;
+}
+
+.fab:hover {
+  filter: brightness(1.08);
 }

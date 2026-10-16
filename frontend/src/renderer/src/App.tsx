@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { api } from "./api";
+import { AddReminderButton } from "./components/AddReminderButton";
 import { AllRemindersView } from "./components/AllRemindersView";
 import { EditDialog } from "./components/EditDialog";
 import { QuickAddDialog } from "./components/QuickAddDialog";
@@ -69,6 +70,7 @@ export function App() {
         {view === "inbox" ? <TagView tagId={null} /> : null}
         {tagId !== null ? <TagView key={tagId} tagId={tagId} /> : null}
       </main>
+      <AddReminderButton />
       <QuickAddDialog />
       <EditDialog />
       <ToastHost />

@@ -16,7 +16,6 @@ export function Sidebar() {
   const { t } = useTranslation();
   const view = useAppStore((state) => state.view);
   const setView = useAppStore((state) => state.setView);
-  const openQuickAdd = useAppStore((state) => state.openQuickAdd);
   const active = useAppStore((state) => state.active);
   const tags = useAppStore((state) => state.tags);
   const language = useAppStore((state) => state.settings.language);
@@ -66,18 +65,6 @@ export function Sidebar() {
         </span>
         OmiReminder
       </div>
-      <button
-        type="button"
-        className="nav-item nav-add"
-        onClick={() => {
-          openQuickAdd();
-        }}
-      >
-        <span className="nav-add-icon">
-          <Icon name="plus" size={14} />
-        </span>
-        <span className="nav-label">{t("nav.addReminder")}</span>
-      </button>
       <div className="nav-group">
         {NAV_ITEMS.map((item) => (
           <div key={item.view}>
