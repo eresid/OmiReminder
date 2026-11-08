@@ -653,6 +653,16 @@ p {
   font-size: 13px;
 }
 
+.startup-error {
+  display: grid;
+  place-items: center;
+  height: 100%;
+}
+
+.startup-error .button {
+  margin-top: 12px;
+}
+
 /* Buttons */
 
 .icon-button {

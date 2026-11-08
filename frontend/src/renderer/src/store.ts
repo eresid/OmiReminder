@@ -263,7 +263,9 @@ export const useAppStore = create<AppStore>()((set, get) => {
       }),
     showToast(message, undo) {
       toastSequence += 1;
-      set({ toast: { id: toastSequence, message, ...(undo ? { undo } : {}) } });
+      // Undo can fail, for example after the reminder was deleted. The error toast replaces this one.
+      const guardedUndo = undo ? () => guarded(undo) : undefined;
+      set({ toast: { id: toastSequence, message, ...(guardedUndo ? { undo: guardedUndo } : {}) } });
     },
     dismissToast() {
       set({ toast: null });

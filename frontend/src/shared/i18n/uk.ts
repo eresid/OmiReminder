@@ -165,6 +165,16 @@ export const uk = {
     today_many: "{{count}} на сьогодні",
     today_other: "{{count}} на сьогодні",
   },
+  startup: {
+    failedTitle: "Не вдалося запустити OmiReminder",
+    failedText: "Не вдалося завантажити нагадування. Спробуйте ще раз або перезапустіть застосунок.",
+    retry: "Спробувати ще раз",
+    dataErrorTitle: "OmiReminder не може відкрити дані",
+    dataErrorText:
+      "Не вдалося відкрити файл нагадувань, тому застосунок закриється. Ваші дані не змінено.\n\nФайл: {{path}}\nПомилка: {{error}}",
+    newerSchemaText:
+      "Файл нагадувань збережено новішою версією OmiReminder. Щоб відкрити його, знову встановіть ту версію. Ваші дані не змінено.\n\nФайл: {{path}}",
+  },
   notification: {
     overdue_one: "{{count}} прострочене",
     overdue_few: "{{count}} прострочені",

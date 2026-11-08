@@ -10,6 +10,7 @@ import {
   validateSettingsPatch,
   validateNewTag,
   validateTagPatch,
+  validateTimeZone,
 } from "../shared/validation";
 import type { ReminderRepository } from "./reminderRepository";
 import type { TagRepository } from "./tagRepository";
@@ -22,6 +23,7 @@ export interface IpcDependencies {
   getEnvironment: () => Environment;
   onRemindersChanged: () => void;
   onSettingsChanged: (previous: Settings, next: Settings) => void;
+  onTimeZoneReported: (timeZone: string) => void;
 }
 
 /** Registers the handlers behind `window.api`. All input from the renderer is validated. */
@@ -78,5 +80,8 @@ export function registerIpcHandlers(deps: IpcDependencies): void {
     const next = settings.update(validateSettingsPatch(patch));
     deps.onSettingsChanged(previous, next);
     return next;
+  });
+  ipcMain.handle(IpcChannel.reportTimeZone, (_event, timeZone: unknown) => {
+    deps.onTimeZoneReported(validateTimeZone(timeZone));
   });
 }

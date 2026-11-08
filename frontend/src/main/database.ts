@@ -42,6 +42,11 @@ export const migrations: readonly string[] = [
   `,
 ];
 
+/** The database was written by a newer app version. It is left untouched. */
+export class NewerSchemaError extends Error {
+  override name = "NewerSchemaError";
+}
+
 export function getSchemaVersion(db: DatabaseSync): number {
   const row = db.prepare("PRAGMA user_version").get();
   const version = row?.user_version;
@@ -51,7 +56,7 @@ export function getSchemaVersion(db: DatabaseSync): number {
 export function migrate(db: DatabaseSync): void {
   const current = getSchemaVersion(db);
   if (current > migrations.length) {
-    throw new Error(`The database schema version ${String(current)} is newer than this app supports`);
+    throw new NewerSchemaError(`The database schema version ${String(current)} is newer than this app supports`);
   }
   for (let index = current; index < migrations.length; index += 1) {
     db.exec("BEGIN");

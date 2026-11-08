@@ -177,6 +177,7 @@ export function createMockApi(): OmiApi {
         changeListeners.delete(listener);
       };
     },
+    reportTimeZone: () => Promise.resolve(),
     onTodayChanged: () => () => undefined,
     onNavigate: () => () => undefined,
   };

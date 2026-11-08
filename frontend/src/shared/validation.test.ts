@@ -8,6 +8,7 @@ import {
   validateSettingsPatch,
   validateTagIds,
   validateTagPatch,
+  validateTimeZone,
   ValidationError,
 } from "./validation";
 
@@ -81,5 +82,13 @@ describe("validation", () => {
     expect(() => validateSettingsPatch({ language: "de" })).toThrow(ValidationError);
     expect(validateSettingsPatch({ theme: "light" })).toEqual({ theme: "light" });
     expect(() => validateSettingsPatch({ theme: "blue" })).toThrow(ValidationError);
+  });
+
+  it("accepts known IANA time zones only", () => {
+    expect(validateTimeZone("Europe/Kyiv")).toBe("Europe/Kyiv");
+    expect(validateTimeZone("America/New_York")).toBe("America/New_York");
+    expect(() => validateTimeZone("Mars/Olympus")).toThrow(ValidationError);
+    expect(() => validateTimeZone("")).toThrow(ValidationError);
+    expect(() => validateTimeZone(42)).toThrow(ValidationError);
   });
 });

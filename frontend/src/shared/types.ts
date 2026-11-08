@@ -109,6 +109,8 @@ export interface OmiApi {
   deleteTag(id: string): Promise<void>;
   getSettings(): Promise<Settings>;
   updateSettings(patch: Partial<Settings>): Promise<Settings>;
+  /** Tells the main process the current IANA time zone of the OS (FR-NOT-1b). */
+  reportTimeZone(timeZone: string): Promise<void>;
   /** Called after any change to reminders or tags. */
   onRemindersChanged(listener: () => void): () => void;
   onTodayChanged(listener: (today: string) => void): () => void;

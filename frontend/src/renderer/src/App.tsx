@@ -10,6 +10,7 @@ import { TagView } from "./components/TagView";
 import { TodayView } from "./components/TodayView";
 import { ToastHost } from "./components/ToastHost";
 import { tagIdOfView, useAppStore } from "./store";
+import { startTimeZoneWatcher } from "./timeZoneWatcher";
 
 function isTyping(target: EventTarget | null): boolean {
   return (
@@ -36,6 +37,7 @@ export function App() {
           setView(target);
         }
       }),
+      startTimeZoneWatcher({ report: (timeZone) => api.reportTimeZone(timeZone) }),
     ];
 
     // Ctrl+N (or Q, as in many task apps) opens quick add.

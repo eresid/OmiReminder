@@ -28,6 +28,7 @@ const api: OmiApi = {
   deleteTag: (id) => ipcRenderer.invoke(IpcChannel.deleteTag, id),
   getSettings: () => ipcRenderer.invoke(IpcChannel.getSettings),
   updateSettings: (patch) => ipcRenderer.invoke(IpcChannel.updateSettings, patch),
+  reportTimeZone: (timeZone) => ipcRenderer.invoke(IpcChannel.reportTimeZone, timeZone),
   onRemindersChanged: (listener) =>
     subscribe(IpcChannel.remindersChanged, () => {
       listener();

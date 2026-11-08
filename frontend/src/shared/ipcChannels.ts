@@ -15,5 +15,6 @@ export const IpcChannel = {
   updateSettings: "settings:update",
   remindersChanged: "reminders:changed",
   todayChanged: "clock:today-changed",
+  reportTimeZone: "clock:report-time-zone",
   navigate: "app:navigate",
 } as const;

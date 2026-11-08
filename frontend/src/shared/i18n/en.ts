@@ -153,6 +153,16 @@ export const en = {
     today_one: "{{count}} today",
     today_other: "{{count}} today",
   },
+  startup: {
+    failedTitle: "OmiReminder could not start",
+    failedText: "Your reminders could not be loaded. Try again, or restart the app.",
+    retry: "Try again",
+    dataErrorTitle: "OmiReminder could not open its data",
+    dataErrorText:
+      "The reminders file could not be opened, so the app will close. Your data was not changed.\n\nFile: {{path}}\nError: {{error}}",
+    newerSchemaText:
+      "The reminders file was saved by a newer version of OmiReminder. Install that version again to open it. Your data was not changed.\n\nFile: {{path}}",
+  },
   notification: {
     overdue_one: "{{count}} overdue",
     overdue_other: "{{count}} overdue",

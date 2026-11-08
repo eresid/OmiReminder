@@ -192,6 +192,19 @@ export function validateDueDateChanges(value: unknown): DueDateChange[] {
   });
 }
 
+/** An IANA time zone name that this runtime knows, such as `Europe/Kyiv`. */
+export function validateTimeZone(value: unknown): string {
+  if (typeof value !== "string" || value.length === 0 || value.length > 100) {
+    throw new ValidationError("Invalid time zone");
+  }
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: value });
+  } catch {
+    throw new ValidationError("Unknown time zone");
+  }
+  return value;
+}
+
 export function isTheme(value: unknown): value is Theme {
   return value === "system" || value === "light" || value === "dark";
 }

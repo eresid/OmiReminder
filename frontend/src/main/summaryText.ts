@@ -1,6 +1,7 @@
 import type { TFunction } from "i18next";
 import type { AttentionCounts } from "../shared/grouping";
 import type { DailySummary } from "../shared/summary";
+import { NewerSchemaError } from "./database";
 
 /** "2 overdue, 3 for today" style counts, skipping zero values. */
 export function formatCounts(t: TFunction, counts: AttentionCounts, namespace: "notification" | "tray"): string {
@@ -34,4 +35,18 @@ export function formatDailySummary(t: TFunction, summary: DailySummary): Notific
 export function formatTrayTooltip(t: TFunction, counts: AttentionCounts): string {
   const details = formatCounts(t, counts, "tray");
   return `OmiReminder\n${details || t("tray.nothingToday")}`;
+}
+
+export interface StartupErrorText {
+  title: string;
+  message: string;
+}
+
+/** The dialog shown when the local database cannot be opened at startup. */
+export function formatDataError(t: TFunction, error: unknown, path: string): StartupErrorText {
+  const message =
+    error instanceof NewerSchemaError
+      ? t("startup.newerSchemaText", { path })
+      : t("startup.dataErrorText", { path, error: error instanceof Error ? error.message : String(error) });
+  return { title: t("startup.dataErrorTitle"), message };
 }

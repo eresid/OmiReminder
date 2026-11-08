@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { NewerSchemaError } from "./database";
 import { createMainI18n } from "./i18n";
-import { formatDailySummary, formatTrayTooltip } from "./summaryText";
+import { formatDailySummary, formatDataError, formatTrayTooltip } from "./summaryText";
 
 describe("summary text", () => {
   it("formats the daily notification in English", () => {
@@ -23,5 +24,21 @@ describe("summary text", () => {
   it("says when there is nothing for today", () => {
     const { t } = createMainI18n("en");
     expect(formatTrayTooltip(t, { overdue: 0, today: 0 })).toBe("OmiReminder\nNothing for today");
+  });
+
+  it("explains a database that cannot be opened", () => {
+    const { t } = createMainI18n("en");
+    const text = formatDataError(t, new Error("database disk image is malformed"), "C:\\data.sqlite");
+    expect(text.title).toBe("OmiReminder could not open its data");
+    expect(text.message).toContain("File: C:\\data.sqlite");
+    expect(text.message).toContain("Error: database disk image is malformed");
+  });
+
+  it("asks to reinstall the newer version for a newer database", () => {
+    const { t } = createMainI18n("uk");
+    const text = formatDataError(t, new NewerSchemaError("newer"), "data.sqlite");
+    expect(text.title).toBe("OmiReminder не може відкрити дані");
+    expect(text.message).toContain("новішою версією");
+    expect(text.message).not.toContain("Помилка");
   });
 });

@@ -1,6 +1,6 @@
 import { DatabaseSync } from "node:sqlite";
 import { describe, expect, it } from "vitest";
-import { getSchemaVersion, migrate, migrations, openDatabase } from "./database";
+import { getSchemaVersion, migrate, migrations, NewerSchemaError, openDatabase } from "./database";
 
 describe("database", () => {
   it("applies all migrations to a new database", () => {
@@ -26,7 +26,7 @@ describe("database", () => {
     db.exec(`PRAGMA user_version = ${String(migrations.length + 1)}`);
     expect(() => {
       migrate(db);
-    }).toThrow(/newer/);
+    }).toThrow(NewerSchemaError);
     db.close();
   });
 

@@ -1,5 +1,6 @@
 import { join } from "node:path";
-import { app, BrowserWindow, Menu, Notification, nativeTheme, powerMonitor, shell } from "electron";
+import type { DatabaseSync } from "node:sqlite";
+import { app, BrowserWindow, dialog, Menu, Notification, nativeTheme, powerMonitor, shell } from "electron";
 import type { i18n } from "i18next";
 import { countAttention } from "../shared/grouping";
 import { IpcChannel } from "../shared/ipcChannels";
@@ -16,7 +17,8 @@ import { createAppIcon } from "./nativeIcons";
 import { ReminderRepository } from "./reminderRepository";
 import { SettingsRepository } from "./settingsRepository";
 import { TagRepository } from "./tagRepository";
-import { formatDailySummary } from "./summaryText";
+import { formatDailySummary, formatDataError } from "./summaryText";
+import { applyTimeZone } from "./timeZone";
 
 /** Matches `--bg` in the renderer, so the window does not flash while it loads. */
 function windowBackground(): string {
@@ -49,7 +51,20 @@ function start(): void {
   app.setAppUserModelId(process.execPath);
   Menu.setApplicationMenu(null);
 
-  const db = openDatabase(join(app.getPath("userData"), "omireminder.sqlite"));
+  const databasePath = join(app.getPath("userData"), "omireminder.sqlite");
+  let db: DatabaseSync;
+  try {
+    db = openDatabase(databasePath);
+  } catch (error) {
+    // Without its data the app cannot work. Explain why in the OS language and quit, leaving the
+    // file as it is, instead of crashing with a raw error.
+    console.error(error);
+    const { t } = createMainI18n(resolveLanguage(app.getPreferredSystemLanguages()));
+    const text = formatDataError(t, error, databasePath);
+    dialog.showErrorBox(text.title, text.message);
+    app.exit(1);
+    return;
+  }
   const reminders = new ReminderRepository(db);
   const tags = new TagRepository(db);
   const settings = new SettingsRepository(db, resolveLanguage(app.getPreferredSystemLanguages()));
@@ -229,6 +244,12 @@ function start(): void {
         applyLaunchAtStartup(next.launchAtStartup);
       }
       if (previous.notificationTime !== next.notificationTime) {
+        scheduler.tick();
+      }
+    },
+    onTimeZoneReported: (timeZone) => {
+      // The new zone can change today's date and the time of the daily summary (FR-NOT-1b).
+      if (applyTimeZone(timeZone)) {
         scheduler.tick();
       }
     },
