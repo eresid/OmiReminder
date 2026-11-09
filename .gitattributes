@@ -1,0 +1,14 @@
+# Keep LF line endings in the repository and in working copies on every OS, as in .editorconfig.
+# This overrides `core.autocrlf`, which Git for Windows turns on by default and which converts files
+# to CRLF, so Prettier and other tools see the same files as in CI.
+* text=auto eol=lf
+
+# Binary files are never converted.
+*.png binary
+*.ico binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.woff binary
+*.woff2 binary
