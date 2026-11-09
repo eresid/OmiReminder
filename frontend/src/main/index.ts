@@ -13,6 +13,7 @@ import { DayScheduler } from "./dayScheduler";
 import { createMainI18n } from "./i18n";
 import type { TrayIconTheme } from "./icons/icons";
 import { registerIpcHandlers } from "./ipc";
+import { HIDDEN_ARGUMENT, loginItemSettings } from "./loginItem";
 import { createAppIcon } from "./nativeIcons";
 import { ReminderRepository } from "./reminderRepository";
 import { SettingsRepository } from "./settingsRepository";
@@ -28,8 +29,6 @@ function windowBackground(): string {
 function systemIconTheme(): TrayIconTheme {
   return nativeTheme.shouldUseDarkColorsForSystemIntegratedUI ? "dark" : "light";
 }
-
-const HIDDEN_ARGUMENT = "--hidden";
 
 app.setName("OmiReminder");
 // Keep development data apart from the data of an installed app.
@@ -209,9 +208,7 @@ function start(): void {
   function applyLaunchAtStartup(enabled: boolean): void {
     // In development this would register the bare Electron binary, so only installed builds do it.
     if (app.isPackaged) {
-      // A portable build runs from a temporary folder; start the original .exe instead.
-      const path = process.env.PORTABLE_EXECUTABLE_FILE ?? process.execPath;
-      app.setLoginItemSettings({ openAtLogin: enabled, path, args: [HIDDEN_ARGUMENT] });
+      app.setLoginItemSettings(loginItemSettings(enabled, process.execPath));
     }
   }
 
