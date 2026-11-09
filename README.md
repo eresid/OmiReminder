@@ -83,6 +83,8 @@ Each directory is an independent project with its own `package.json`.
 
 ## Development
 
+See [frontend/README.md](frontend/README.md) for the full guide to developing, testing, and building the desktop app.
+
 The desktop app needs Node.js 22.13 or later (Node.js 24 LTS recommended) and pnpm. Enable pnpm once with `corepack enable`, then run in `frontend/`:
 
 - `pnpm install` installs dependencies and downloads the Electron binary.
